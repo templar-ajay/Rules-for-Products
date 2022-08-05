@@ -8,12 +8,15 @@ const productHandles = [
   "short_video_product",
   "shirt_with_video",
   "shirt_with_video",
+  "woahwoahwoah",
 ];
 const baseUrl = "https://afzal-test-shop.myshopify.com/products/";
 
 // ##########################################################################
 
-const remainingArrayOfProductHandles = [...productHandles];
+const remainingSetOfProductHandles = new Set(productHandles);
+
+console.log(remainingSetOfProductHandles);
 
 const container = document.getElementById("container");
 const makeRuleBtn = document.getElementById("make-rule");
@@ -22,14 +25,14 @@ const makeRuleInnerHTMl = `<div class="card p-3">
 <div class="autocomplete">
   <label>Master Product</label>
   <div class=" input-group mb-3" id ="master-input-div">
-    <input id="master-input" type="text" name="myCountry" class="form-control" placeholder="enter name of master product here" style="width:max-content" >
+    <input id="master-input" type="text" name="myCountry" class="form-control" placeholder="enter the handle of master product here" style="width:max-content" >
   </div>
 </div>
 
 <div class="autocomplete">
   <label>Child Products</label>
     <div class="input-group mb-3" id ="child-input-div">
-      <input type="text" id = "child-input" name="myCountry" class="form-control" placeholder="enter names of child products here" style="width:max-content">
+      <input type="text" id = "child-input" name="myCountry" class="form-control" placeholder="enter the handles of child products here" style="width:max-content">
     </div>
 </div>
   
@@ -46,10 +49,10 @@ makeRuleBtn.addEventListener("click", () => {
   const addRuleBtn = document.getElementById("add-rule");
   const discardRuleBtn = document.getElementById("discard-rule");
   masterInput.addEventListener("click", (e) => {
-    autocomplete(e.target, remainingArrayOfProductHandles);
+    autocomplete(e.target, remainingSetOfProductHandles);
   });
   childInput.addEventListener("click", (e) => {
-    autocomplete(e.target, remainingArrayOfProductHandles);
+    autocomplete(e.target, remainingSetOfProductHandles);
   });
   addRuleBtn.addEventListener("click", () => {
     showAddedRules(true);
@@ -78,7 +81,7 @@ async function foo() {
   return obj;
 }
 
-function autocomplete(inp, arr) {
+function autocomplete(inp, set) {
   /*the autocomplete function takes two arguments,
   the text field element and an array of possible autocompleted values:*/
   var currentFocus;
@@ -90,9 +93,7 @@ function autocomplete(inp, arr) {
       val = this.value;
     /*close any already open lists of autocompleted values*/
     closeAllLists();
-    if (!val) {
-      return false;
-    }
+    if (!val) return false;
     currentFocus = -1;
     /*create a DIV element that will contain the items (values):*/
     a = document.createElement("DIV");
@@ -101,16 +102,17 @@ function autocomplete(inp, arr) {
     /*append the DIV element as a child of the autocomplete container:*/
     this.parentNode.parentNode.appendChild(a);
     /*for each item in the array...*/
-    for (i = 0; i < arr.length; i++) {
+    for (const value of set) {
       /*check if the item starts with the same letters as the text field value:*/
-      if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
+
+      if (value.substr(0, val.length).toUpperCase() == val.toUpperCase()) {
         /*create a DIV element for each matching element:*/
         b = document.createElement("DIV");
         /*make the matching letters bold:*/
-        b.innerHTML = "<strong>" + arr[i].substr(0, val.length) + "</strong>";
-        b.innerHTML += arr[i].substr(val.length);
+        b.innerHTML = "<strong>" + value.substr(0, val.length) + "</strong>";
+        b.innerHTML += value.substr(val.length);
         /*insert a input field that will hold the current array item's value:*/
-        b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
+        b.innerHTML += "<input type='hidden' value='" + value + "'>";
         /*execute a function when someone clicks on the item value (DIV element):*/
         b.addEventListener("click", function (e) {
           /*insert the value for the autocomplete text field:*/
@@ -120,7 +122,7 @@ function autocomplete(inp, arr) {
             inp,
             this.getElementsByTagName("input")[0].value
           );
-          changeMasterInput();
+          changeInputs();
           // inp.value = this.getElementsByTagName("input")[0].value;
           /*close the list of autocompleted values,
               (or any other open lists of autocompleted values:*/
@@ -197,7 +199,7 @@ function addSelection(parentDiv, addBefore, selectionText) {
     btn.type = "button";
     const span = document.createElement("span");
     span.innerHTML = selectionText;
-    updateRemainingArray("remove", selectionText);
+    updateRemainingArray("delete", selectionText);
     btn.appendChild(span);
     btn.style.width = "200px";
     btn.classList += " text-nowrap";
@@ -208,9 +210,9 @@ function addSelection(parentDiv, addBefore, selectionText) {
 }
 function removeBtn(e) {
   console.log(`removing ${e.target.childNodes[0].innerHTML}`);
-  remainingArrayOfProductHandles.push(e.target.childNodes[0].innerHTML);
+  updateRemainingArray("add", e.target.childNodes[0].innerHTML);
   e.target.remove();
-  changeMasterInput();
+  changeInputs();
 }
 function showMakeRule(x) {
   const makeRuleCard = document.getElementById("make-rule-card");
@@ -225,23 +227,42 @@ function showAddedRules(x) {
     ? (addedRulesCard.style.display = "block")
     : (addedRulesCard.style.display = "none");
 }
-function changeMasterInput() {
+function changeInputs() {
+  let set;
   const masterInput = document.getElementById("master-input");
+  const childInput = document.getElementById("child-input");
   if (masterInput.parentElement.childNodes.length > 3) {
     masterInput.disabled = "true";
+    masterInput.placeholder = "is the master Product";
   } else {
     masterInput.disabled = "";
+    masterInput.placeholder = "enter the handle of master product here";
+  }
+  if (
+    childInput.parentElement.childNodes.length >
+    (set = new Set(productHandles)).size + 1
+  ) {
+    childInput.disabled = "true";
+    childInput.placeholder = "are the child products";
+  } else {
+    childInput.disabled = "";
+    childInput.placeholder = "enter the handles of child products here";
   }
 }
 
 function updateRemainingArray(method, value) {
-  method == "remove"
-    ? remainingArrayOfProductHandles.splice(
-        remainingArrayOfProductHandles.indexOf(value),
-        1
-      )
-    : remainingArrayOfProductHandles.push(value);
-  console.log("remainingArrayOfProductHandles", remainingArrayOfProductHandles);
+  remainingSetOfProductHandles[method](value);
+  console.log("remainingSetOfProductHandles", remainingSetOfProductHandles);
+  populateHandles();
+}
+function populateHandles() {
+  const ul = document.getElementById("product handles");
+  ul.innerHTML = "";
+  remainingSetOfProductHandles.forEach((handle) => {
+    const li = document.createElement("li");
+    li.innerHTML = handle;
+    ul.appendChild(li);
+  });
 }
 // #######################################################################
 // const objectFromAPIs = await foo();
