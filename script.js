@@ -23,7 +23,6 @@ const makeRuleInnerHTMl = `<div class="card p-3">
   <label>Master Product</label>
   <div class=" input-group mb-3" id ="master-input-div">
     <input id="master-input" type="text" name="myCountry" class="form-control" placeholder="enter name of master product here" style="width:max-content" >
-    <br/>
   </div>
 </div>
 
@@ -41,7 +40,6 @@ const makeRuleInnerHTMl = `<div class="card p-3">
 </div>`;
 
 makeRuleBtn.addEventListener("click", () => {
-  console.log(`will add rule`);
   showMakeRule(true);
   const masterInput = document.getElementById("master-input");
   const childInput = document.getElementById("child-input");
@@ -199,18 +197,20 @@ function addSelection(parentDiv, addBefore, selectionText) {
     btn.type = "button";
     const span = document.createElement("span");
     span.innerHTML = selectionText;
+    updateRemainingArray("remove", selectionText);
     btn.appendChild(span);
     btn.style.width = "200px";
     btn.classList += " text-nowrap";
-
     btn.classList += " removable";
     btn.addEventListener("click", removeBtn);
     return btn;
   }
 }
 function removeBtn(e) {
-  console.log(`remove ${e.target.value}`);
+  console.log(`removing ${e.target.childNodes[0].innerHTML}`);
+  remainingArrayOfProductHandles.push(e.target.childNodes[0].innerHTML);
   e.target.remove();
+  changeMasterInput();
 }
 function showMakeRule(x) {
   const makeRuleCard = document.getElementById("make-rule-card");
@@ -227,7 +227,21 @@ function showAddedRules(x) {
 }
 function changeMasterInput() {
   const masterInput = document.getElementById("master-input");
-  masterInput.
+  if (masterInput.parentElement.childNodes.length > 3) {
+    masterInput.disabled = "true";
+  } else {
+    masterInput.disabled = "";
+  }
+}
+
+function updateRemainingArray(method, value) {
+  method == "remove"
+    ? remainingArrayOfProductHandles.splice(
+        remainingArrayOfProductHandles.indexOf(value),
+        1
+      )
+    : remainingArrayOfProductHandles.push(value);
+  console.log("remainingArrayOfProductHandles", remainingArrayOfProductHandles);
 }
 // #######################################################################
 // const objectFromAPIs = await foo();
