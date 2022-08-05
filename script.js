@@ -8,18 +8,20 @@ const productHandles = [
   "short_video_product",
   "shirt_with_video",
   "shirt_with_video",
-  "woahwoahwoah",
 ];
 const baseUrl = "https://afzal-test-shop.myshopify.com/products/";
 
 // ##########################################################################
 
 const remainingSetOfProductHandles = new Set(productHandles);
+populateHandles("first-time");
 
 console.log(remainingSetOfProductHandles);
 
 const container = document.getElementById("container");
 const makeRuleBtn = document.getElementById("make-rule");
+
+const setOfRules = new Set();
 
 const makeRuleInnerHTMl = `<div class="card p-3">
 <div class="autocomplete">
@@ -32,7 +34,7 @@ const makeRuleInnerHTMl = `<div class="card p-3">
 <div class="autocomplete">
   <label>Child Products</label>
     <div class="input-group mb-3" id ="child-input-div">
-      <input type="text" id = "child-input" name="myCountry" class="form-control" placeholder="enter the handles of child products here" style="width:max-content">
+      <input type="text" id = "child-input" name="myCountry" class="form-control" placeholder="enter the handles of child products here" style="width:max-content ">
     </div>
 </div>
   
@@ -55,11 +57,17 @@ makeRuleBtn.addEventListener("click", () => {
     autocomplete(e.target, remainingSetOfProductHandles);
   });
   addRuleBtn.addEventListener("click", () => {
-    showAddedRules(true);
-    showMakeRule();
+    // if (!entriesCheck()) return; // exit function if it fails entry check
+    addRule();
+    showListOfRulesCard(true); // shows list of added rules
+    showMakeRule(); // deletes make rule card
+    remakeRemainingSetofProductHandles();
+    populateHandles("x");
   });
   discardRuleBtn.addEventListener("click", () => {
-    showMakeRule();
+    showMakeRule(); // deletes make rule card
+    remakeRemainingSetofProductHandles();
+    populateHandles("x");
   });
 });
 
@@ -221,11 +229,11 @@ function showMakeRule(x) {
     : (makeRuleCard.innerHTML = "");
 }
 
-function showAddedRules(x) {
-  const addedRulesCard = document.getElementById("added-rules-card");
+function showListOfRulesCard(x) {
+  const listOfRulesCard = document.getElementById("list-of-rules-card");
   x
-    ? (addedRulesCard.style.display = "block")
-    : (addedRulesCard.style.display = "none");
+    ? (listOfRulesCard.style.display = "block")
+    : (listOfRulesCard.style.display = "none");
 }
 function changeInputs() {
   let set;
@@ -255,7 +263,7 @@ function updateRemainingArray(method, value) {
   console.log("remainingSetOfProductHandles", remainingSetOfProductHandles);
   populateHandles();
 }
-function populateHandles() {
+function populateHandles(x) {
   const ul = document.getElementById("product handles");
   ul.innerHTML = "";
   remainingSetOfProductHandles.forEach((handle) => {
@@ -263,6 +271,52 @@ function populateHandles() {
     li.innerHTML = handle;
     ul.appendChild(li);
   });
+  const label = document.getElementById("product-handles-label");
+  label.innerHTML = x
+    ? "&nbsp;&nbsp;  All Product Handles - "
+    : "&nbsp;&nbsp; Remaining Product Handles";
+}
+function remakeRemainingSetofProductHandles() {
+  productHandles.forEach((value) => remainingSetOfProductHandles.add(value));
+  console.log(`remainingSetOfProductHandles`, remainingSetOfProductHandles);
+  makeRuleBtn.style.display = "";
+}
+function addRule() {
+  const obj = {};
+  console.log(`acces by outerText or innerText`);
+  const RuleBtns = document.querySelectorAll(".removable");
+  console.log(`ruleBtns`, RuleBtns);
+  RuleBtns.forEach((btn, index) => {
+    index != 0
+      ? (obj["childProducts"] || (obj["childProducts"] = [])).push(
+          btn.innerText
+        )
+      : (obj["masterProduct"] = btn.innerText);
+  });
+  setOfRules.add(obj);
+  console.log(setOfRules);
+  loadListOfRules();
+}
+function loadListOfRules() {
+  if (setOfRules[0]) {
+    const listOfRules = document.getElementById("list-of-rules");
+    listOfRules.innerHTML = "";
+    setOfRules.forEach((rule, index) => {
+      const li = document.createElement("li");
+      li.className = "list-group-item";
+      li.innerHTML = `<b>Master Product -> </b> ${rule.masterProduct} <b>child Products -> </b>`;
+      rule.childProducts.forEach((childProduct, index) => {
+        li.innerHTML += (index ? ", " : " ") + childProduct;
+      });
+      listOfRules.appendChild(li);
+    });
+  } else console.log(`no rule found`);
+}
+function entriesCheck() {
+  // const masterInput = document.getElementById("master-input");
+  // const childInput = document.getElementById("child-input");
+  // console.log(masterInput.parentElement.childNodes[0]);
+  return true;
 }
 // #######################################################################
 // const objectFromAPIs = await foo();

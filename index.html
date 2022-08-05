@@ -41,28 +41,27 @@
     </nav>
     <small id="initial-message" class="text-secondary mx-3">Start making rules for your products</small></br>
     <button class="btn btn-outline-primary mx-3" id = "make-rule"
-     onclick="document.getElementById('initial-message')?.remove()"
+     onclick="event.target.style.display='none';document.getElementById('initial-message')?.remove() ; "
       data-toggle="button" aria-pressed="false">Make New Rule</button>
-    
     <div id="container" class="container-fluid m-5 container-lg mx-auto" >
       
       <div id="make-rule-card">
         
       </div>
       <br><br><br><br>
-      <div id="added-rules-card" style="display:none ;">
-
+      <div id="list-of-rules-card" style="display:none ;">
         <div class="card" style="width: 100%">
           <div class="card-header">
             List of Rules
           </div>
-          <ul class="list-group list-group-flush">
+          <ul class="list-group list-group-flush" id="list-of-rules">
             <!-- <li class="list-group-item">An item</li> --> 
           </ul>
         </div>
       </div>
     </div>
     <div >
+      <label id="product-handles-label"> &nbsp;&nbsp; Select from these Product handles</label>
       <ul id="product handles">
 
       </ul>
