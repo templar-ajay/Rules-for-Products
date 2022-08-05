@@ -298,7 +298,7 @@ function addRule() {
   loadListOfRules();
 }
 function loadListOfRules() {
-  if (setOfRules[0]) {
+  if (setOfRules.size) {
     const listOfRules = document.getElementById("list-of-rules");
     listOfRules.innerHTML = "";
     setOfRules.forEach((rule, index) => {
