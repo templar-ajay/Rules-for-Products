@@ -69,8 +69,11 @@ makeRuleBtn.addEventListener("click", () => {
   discardRuleBtn.addEventListener("click", () => {
     showMakeRule(); // deletes make rule card
     remakeRemainingSetofProductHandles();
+<<<<<<< HEAD
 
     
+=======
+>>>>>>> 410d8c03eff07a1ee9b500ba724854db47d742ba
     // populateHandles("x");
   });
 });
@@ -290,8 +293,13 @@ function remakeRemainingSetofProductHandles() {
 }
 function addRule() {
   if (!entriesCheck()) return false;
+<<<<<<< HEAD
   
   console.log(`access by outerText or innerText`);
+=======
+  const obj = {};
+  console.log(`acces by outerText or innerText`);
+>>>>>>> 410d8c03eff07a1ee9b500ba724854db47d742ba
   const RuleBtns = document.querySelectorAll(".removable");
   console.log(`ruleBtns`, RuleBtns);
   RuleBtns.forEach((btn, index) => {
@@ -323,6 +331,20 @@ function loadListOfRules() {
   } else console.log(`no rule found`);
 }
 function entriesCheck() {
+<<<<<<< HEAD
+=======
+  const masterInput = document.getElementById("master-input");
+  const childInput = document.getElementById("child-input");
+  console.log(
+    masterInput.parentElement.childNodes[0].nextElementSibling.innerText,
+    "masterInput.ParentElement.childNodes[0].nextElementSibling.innerText"
+  );
+  console.log(
+    childInput.parentElement.childNodes[0].nextElementSibling.nextElementSibling
+      .innerText,
+    "child  Input.ParentElement.childNodes[0].nextElementSibling.innerText"
+  );
+>>>>>>> 410d8c03eff07a1ee9b500ba724854db47d742ba
 
   return true;
 }
