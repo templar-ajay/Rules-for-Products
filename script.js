@@ -55,9 +55,11 @@ makeRuleBtn.addEventListener("click", () => {
   const addRuleBtn = document.querySelector("#add-rule");
   const discardRuleBtn = document.querySelector("#discard-rule");
   masterInput.addEventListener("click", function (e) {
+    showErrorInInput(false);
     autocomplete(masterInput, remainingSetOfProductHandles);
   });
   childInput.addEventListener("click", function (e) {
+    showErrorInInput(false);
     autocomplete(childInput, remainingSetOfProductHandles);
   });
 
@@ -306,7 +308,9 @@ function addRule() {
 
     console.log(localStorage.getItem("rules"));
     loadListOfRules();
+    return true;
   } else {
+    showErrorInInput(true);
     return false;
   }
 }
@@ -318,8 +322,12 @@ function loadListOfRules() {
 
   for (const [key, value] of Object.entries(ObjectFromRules)) {
     const li = document.createElement("li");
-    li.className = "list-group-item";
+    li.className = "list-group-item d-flex justify-content-between";
+    li.style.width = "100%";
     li.innerHTML = `<b> ${key} </b>`;
+
+    li.appendChild(createBtn(key, "view", "primary"));
+
     listOfRulesEl.appendChild(li);
   }
   return Object.keys(ObjectFromRules).length; // returns false if object is empty;
@@ -333,6 +341,7 @@ function entriesCheck() {
     childInput.parentElement.childNodes.length > 3
   )
     return true;
+  else return false;
 }
 
 function resetCurrentRuleEntriesObject() {
@@ -352,17 +361,48 @@ function removeMasterProductsFromRemainingSetOfProductHandles() {
     remainingSetOfProductHandles.delete(key);
   }
 }
-function showErrorInInput() {
+
+function showErrorInInput(x) {
   const masterInput = document.querySelector("#master-input");
   const childInput = document.querySelector("#child-input");
-  if (masterInput.parentElement.childNodes.length > 3) {
-    masterInput.setCustomValidity("one master product is compulsory");
-    masterInput.reportValidity();
+
+  const y = remainingSetOfProductHandles.size > 2;
+
+  if (masterInput.parentElement.childNodes.length < 4) {
+    masterInput.placeholder = x
+      ? y
+        ? "PLEASE SELECT ONE MASTER PRODUCT"
+        : "CANNOT MAKE A RULE WITH JUST ONE PRODUCT - PLEASE DISCARD"
+      : "enter the handle of master product here";
+
+    x
+      ? (masterInput.classList += " bg-warning")
+      : masterInput.classList.remove("bg-warning");
   }
-  if (childInput.parentElement.childNodes.length > 3) {
-    childInput.setCustomValidity("one child product is compulsory");
-    childInput.reportValidity();
+  if (childInput.parentElement.childNodes.length < 4) {
+    childInput.placeholder = x
+      ? y
+        ? "PLEASE SELECT ONE CHILD PRODUCT"
+        : "CANNOT MAKE A RULE WITH JUST ONE PRODUCT - PLEASE DISCARD"
+      : "enter the handles of child products here";
+    x
+      ? (childInput.classList += " bg-warning")
+      : childInput.classList.remove("bg-warning");
   }
+}
+
+function createBtn(id, type, color) {
+  const button = document.createElement("button");
+  button.className = `btn btn-outline-${color}`;
+  button.id = `${id}-${type}-btn`;
+  button.innerHTML = type[0].toUpperCase() + type.slice(1);
+  button.addEventListener("click", (e) => {
+    type == "view" ? onViewBtnClick(id) : null;
+  });
+  return button;
+}
+function onViewBtnClick(id) {
+  console.log(`id`, id);
 }
 
 // #######################################################################
