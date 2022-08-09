@@ -13,17 +13,19 @@ const baseUrl = "https://afzal-test-shop.myshopify.com/products/";
 
 // ##########################################################################
 
-const remainingSetOfProductHandles = new Set(productHandles);
-
-console.log(remainingSetOfProductHandles);
-
 const container = document.getElementById("container");
 const makeRuleBtn = document.getElementById("make-rule");
 const currentRuleEntries = {};
-localStorage.setItem("Rules",[])
+const remainingSetOfProductHandles = new Set();
+remakeRemainingSetOfProductHandles();
+console.log(remainingSetOfProductHandles);
 
-
-const setOfRules = new Set();
+checkLocalStorage()
+  ? loadListOfRules()
+    ? (showListOfRulesCard(true),
+      removeMasterProductsFromRemainingSetOfProductHandles())
+    : null
+  : null;
 
 const makeRuleInnerHTMl = `<form autocomplete="off"><div class="card p-3">
 <div class="autocomplete">
@@ -48,10 +50,10 @@ const makeRuleInnerHTMl = `<form autocomplete="off"><div class="card p-3">
 
 makeRuleBtn.addEventListener("click", () => {
   showMakeRule(true);
-  const masterInput = document.getElementById("master-input");
-  const childInput = document.getElementById("child-input");
-  const addRuleBtn = document.getElementById("add-rule");
-  const discardRuleBtn = document.getElementById("discard-rule");
+  const masterInput = document.querySelector("#master-input");
+  const childInput = document.querySelector("#child-input");
+  const addRuleBtn = document.querySelector("#add-rule");
+  const discardRuleBtn = document.querySelector("#discard-rule");
   masterInput.addEventListener("click", function (e) {
     autocomplete(masterInput, remainingSetOfProductHandles);
   });
@@ -61,15 +63,19 @@ makeRuleBtn.addEventListener("click", () => {
 
   addRuleBtn.addEventListener("click", () => {
     // if (!entriesCheck()) return; // exit function if it fails entry check
-    addRule();
-    showListOfRulesCard(true); // shows list of added rules
-    showMakeRule(); // deletes make rule card
-    remakeRemainingSetofProductHandles();
+    addRule()
+      ? (showListOfRulesCard(true), //  shows list of added rules
+        showMakeRule(), // deletes make rule card
+        remakeRemainingSetOfProductHandles(),
+        removeMasterProductsFromRemainingSetOfProductHandles(),
+        (makeRuleBtn.style.display = ""))
+      : null;
   });
   discardRuleBtn.addEventListener("click", () => {
     showMakeRule(); // deletes make rule card
-    remakeRemainingSetofProductHandles();
-
+    remakeRemainingSetOfProductHandles();
+    removeMasterProductsFromRemainingSetOfProductHandles();
+    makeRuleBtn.style.display = "";
   });
 });
 
@@ -84,7 +90,7 @@ async function foo() {
   for (let i = 0; i < productHandles.length; i++) {
     const js = await getApi(`${baseUrl + productHandles[i]}.js`);
     const json = await getApi(`${baseUrl + productHandles[i]}.json`);
-    console.log(js, json);
+    // console.log(js, json);
 
     obj[productHandles[i]] = [js, json];
   }
@@ -221,21 +227,18 @@ function addSelection(parentDiv, addBefore, selectionText) {
     btn.addEventListener("click", removeBtn);
     return btn;
   }
-  console.log(`addBefore`,addBefore);
-  if (addBefore.id =="master-input"){
-    currentRuleEntries["masterProduct"] = selectionText
-
-    ;
-  }else if (addBefore.id == "child-input"){
-    (currentRuleEntries["childProducts"] || (currentRuleEntries["childProducts"] = [])).push(
-      selectionText
-    )
+  if (addBefore.id == "master-input") {
+    currentRuleEntries["masterProduct"] = selectionText;
+  } else if (addBefore.id == "child-input") {
+    (
+      currentRuleEntries["childProducts"] ||
+      (currentRuleEntries["childProducts"] = [])
+    ).push(selectionText);
   }
-  console.log(`currentRuleEntries`,currentRuleEntries);
-  
+  console.log(`currentRuleEntries`, currentRuleEntries);
 }
 function removeBtn(e) {
-  console.log(`removing ${e.target.childNodes[0].innerHTML}`);
+  // console.log(`removing ${e.target.childNodes[0].innerHTML}`);
   updateRemainingArray("add", e.target.childNodes[0].innerHTML);
   e.target.remove();
   changeInputs();
@@ -248,11 +251,15 @@ function showMakeRule(x) {
 }
 
 function showListOfRulesCard(x) {
-  const listOfRulesCard = document.getElementById("list-of-rules-card");
-  x
+  const listOfRulesCard = document.querySelector("#list-of-rules-card");
+  const listOfRulesEl = document.querySelector("#list-of-rules");
+  listOfRulesEl.innerHTML == ""
+    ? null
+    : x
     ? (listOfRulesCard.style.display = "block")
     : (listOfRulesCard.style.display = "none");
 }
+
 function changeInputs() {
   let set;
   const masterInput = document.getElementById("master-input");
@@ -265,8 +272,8 @@ function changeInputs() {
     masterInput.placeholder = "enter the handle of master product here";
   }
   if (
-    childInput.parentElement.childNodes.length >
-    (set = new Set(productHandles)).size + 1
+    (set = new Set(remainingSetOfProductHandles)).size <
+    (masterInput.parentElement.childNodes.length > 3 ? 1 : 2)
   ) {
     childInput.disabled = "true";
     childInput.placeholder = "are the child products";
@@ -278,59 +285,84 @@ function changeInputs() {
 
 function updateRemainingArray(method, value) {
   remainingSetOfProductHandles[method](value);
-  console.log("remainingSetOfProductHandles", remainingSetOfProductHandles);
+  // console.log("remainingSetOfProductHandles", remainingSetOfProductHandles);
 }
 
-function remakeRemainingSetofProductHandles() {
+function remakeRemainingSetOfProductHandles() {
   productHandles.forEach((value) => remainingSetOfProductHandles.add(value));
   console.log(`remainingSetOfProductHandles`, remainingSetOfProductHandles);
-  makeRuleBtn.style.display = "";
 }
+
 function addRule() {
-  if (!entriesCheck()) return false;
+  if (entriesCheck()) {
+    // perform crud operation in local storage
 
+    const ObjectFromRules = JSON.parse(localStorage.getItem("rules"));
+    ObjectFromRules[currentRuleEntries.masterProduct] =
+      currentRuleEntries.childProducts;
+    localStorage.setItem("rules", JSON.stringify(ObjectFromRules));
 
-  const obj = {};
-  console.log(`acces by outerText or innerText`);
+    resetCurrentRuleEntriesObject();
 
-  const RuleBtns = document.querySelectorAll(".removable");
-  console.log(`ruleBtns`, RuleBtns);
-  RuleBtns.forEach((btn, index) => {
-    index != 0
-      ? (currentRuleEntries["childProducts"] || (currentRuleEntries["childProducts"] = [])).push(
-          btn.innerText
-        )
-      : (currentRuleEntries["masterProduct"] = btn.innerText);
-  });
-  // perform crud operation in local storage
-  console.log(localStorage.getIem(rules))  
-  setOfRules.add(currentRuleEntries);
-  console.log(setOfRules);
-  loadListOfRules();
+    console.log(localStorage.getItem("rules"));
+    loadListOfRules();
+  } else {
+    return false;
+  }
 }
+
 function loadListOfRules() {
-  if (setOfRules.size) {
-    const listOfRules = document.getElementById("list-of-rules");
-    listOfRules.innerHTML = "";
-    setOfRules.forEach((rule, index) => {
-      const li = document.createElement("li");
-      li.className = "list-group-item";
-      li.innerHTML = `<b>Master Product -> </b> ${rule.masterProduct} <b>child Products -> </b>`;
-      rule.childProducts.forEach((childProduct, index) => {
-        li.innerHTML += (index ? ", " : " ") + childProduct;
-      });
-      listOfRules.appendChild(li);
-    });
-  } else console.log(`no rule found`);
-}
-function entriesCheck() {
+  const ObjectFromRules = JSON.parse(localStorage.getItem("rules"));
+  const listOfRulesEl = document.querySelector("#list-of-rules");
+  listOfRulesEl.innerHTML = "";
 
-  return true;
+  for (const [key, value] of Object.entries(ObjectFromRules)) {
+    const li = document.createElement("li");
+    li.className = "list-group-item";
+    li.innerHTML = `<b> ${key} </b>`;
+    listOfRulesEl.appendChild(li);
+  }
+  return Object.keys(ObjectFromRules).length; // returns false if object is empty;
+}
+
+function entriesCheck() {
+  const masterInput = document.querySelector("#master-input");
+  const childInput = document.querySelector("#child-input");
+  if (
+    masterInput.parentElement.childNodes.length > 3 &&
+    childInput.parentElement.childNodes.length > 3
+  )
+    return true;
 }
 
 function resetCurrentRuleEntriesObject() {
-  currentRuleEntries.master = ""
+  currentRuleEntries.master = "";
   currentRuleEntries.children = [];
+}
+
+function checkLocalStorage() {
+  if (!localStorage.getItem("rules")) {
+    localStorage.setItem("rules", "{}");
+  } else return true;
+}
+function removeMasterProductsFromRemainingSetOfProductHandles() {
+  // To remove master products from Set of remaining products
+  const ObjectFromRules = JSON.parse(localStorage.getItem("rules"));
+  for (const [key, value] of Object.entries(ObjectFromRules)) {
+    remainingSetOfProductHandles.delete(key);
+  }
+}
+function showErrorInInput() {
+  const masterInput = document.querySelector("#master-input");
+  const childInput = document.querySelector("#child-input");
+  if (masterInput.parentElement.childNodes.length > 3) {
+    masterInput.setCustomValidity("one master product is compulsory");
+    masterInput.reportValidity();
+  }
+  if (childInput.parentElement.childNodes.length > 3) {
+    childInput.setCustomValidity("one child product is compulsory");
+    childInput.reportValidity();
+  }
 }
 // #######################################################################
 // const objectFromAPIs = await foo();
