@@ -29,14 +29,14 @@ checkLocalStorage()
 
 const makeRuleInnerHTMl = `<form autocomplete="off"><div class="card p-3">
 <div class="autocomplete">
-  <label>Master Product</label>
+  <label for = "master-input" >Master Product</label>
   <div class=" input-group mb-3" id ="master-input-div">
     <input id="master-input" type="text" name="myCountry" class="form-control" placeholder="enter the handle of master product here" style="width:max-content" >
   </div>
 </div>
 
 <div class="autocomplete">
-  <label>Child Products</label>
+  <label for ="child-input">Child Products</label>
     <div class="input-group mb-3" id ="child-input-div">
       <input type="text" id = "child-input" name="myCountry" autocomplete="off" class="form-control" placeholder="enter the handles of child products here" style="width:max-content ">
     </div>
@@ -364,6 +364,7 @@ function showErrorInInput() {
     childInput.reportValidity();
   }
 }
+
 // #######################################################################
 // const objectFromAPIs = await foo();
 // console.log("objectFromAPIs", objectFromAPIs);
