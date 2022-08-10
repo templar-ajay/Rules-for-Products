@@ -65,6 +65,7 @@ makeRuleBtn.addEventListener("click", () => {
 
   addRuleBtn.addEventListener("click", () => {
     // if (!entriesCheck()) return; // exit function if it fails entry check
+
     addRule()
       ? (showListOfRulesCard(true), //  shows list of added rules
         showMakeRule(), // deletes make rule card
@@ -313,6 +314,7 @@ function addRule() {
     const ObjectFromRules = JSON.parse(localStorage.getItem("rules"));
     ObjectFromRules[currentRuleEntries.masterProduct] =
       currentRuleEntries.childProducts;
+
     localStorage.setItem("rules", JSON.stringify(ObjectFromRules));
 
     resetCurrentRuleEntriesObject();
@@ -449,6 +451,10 @@ function onEditBtnClick(id) {
     autocomplete(childInput, remainingSetOfProductHandles);
   });
   changeInputs();
+
+  updateRuleBtn.addEventListener("click", () => {});
+  const discardRuleBtn = document.querySelector("#discard-rule");
+  discardRuleBtn.addEventListener("click", () => {});
 }
 
 function updateCurrentSelectionChildProductSet(method, value) {
