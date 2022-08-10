@@ -345,8 +345,8 @@ function entriesCheck() {
 }
 
 function resetCurrentRuleEntriesObject() {
-  currentRuleEntries.master = "";
-  currentRuleEntries.children = [];
+  currentRuleEntries.masterProduct = "";
+  currentRuleEntries.childProducts = [];
 }
 
 function checkLocalStorage() {
