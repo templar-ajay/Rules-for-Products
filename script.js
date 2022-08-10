@@ -212,9 +212,8 @@ function autocomplete(inp, set) {
   });
 }
 
-function addSelection(parentDiv, addBefore, selectionText) {
+function addSelection(parentDiv, addBefore, selectionText, isNonRemovable) {
   parentDiv.insertBefore(createBtn(), addBefore);
-  createBtn(selectionText);
   function createBtn() {
     const btn = document.createElement("btn");
     btn.className = "btn btn-outline-primary";
@@ -223,10 +222,10 @@ function addSelection(parentDiv, addBefore, selectionText) {
     span.innerHTML = selectionText;
     updateRemainingArray("delete", selectionText);
     btn.appendChild(span);
-    btn.style.width = "200px";
+    btn.style.width = isNonRemovable ? "max-content" : "200px";
     btn.classList += " text-nowrap";
-    btn.classList += " removable";
-    btn.addEventListener("click", removeBtn);
+    btn.classList += isNonRemovable ? " non-removable" : " removable";
+    btn.addEventListener("click", isNonRemovable ? null : removeBtn);
     return btn;
   }
   if (addBefore.id == "master-input") {
@@ -326,8 +325,12 @@ function loadListOfRules() {
     li.style.width = "100%";
     li.innerHTML = `<b> ${key} </b>`;
 
-    li.appendChild(createBtn(key, "view", "primary"));
+    const span = document.createElement("span");
 
+    span.appendChild(createBtn(key, "Preview", "primary"));
+    span.appendChild(createBtn(key, "Edit-Rule", "warning"));
+
+    li.appendChild(span);
     listOfRulesEl.appendChild(li);
   }
   return Object.keys(ObjectFromRules).length; // returns false if object is empty;
@@ -393,16 +396,39 @@ function showErrorInInput(x) {
 
 function createBtn(id, type, color) {
   const button = document.createElement("button");
-  button.className = `btn btn-outline-${color}`;
+  button.className = `btn btn-outline-${color} mx-2`;
   button.id = `${id}-${type}-btn`;
   button.innerHTML = type[0].toUpperCase() + type.slice(1);
   button.addEventListener("click", (e) => {
-    type == "view" ? onViewBtnClick(id) : null;
+    type == "Preview"
+      ? onViewBtnClick(id)
+      : type == "Edit-Rule"
+      ? onEditBtnClick(id)
+      : null;
   });
   return button;
 }
 function onViewBtnClick(id) {
   console.log(`id`, id);
+
+  const rules = JSON.parse(localStorage.getItem("rules"));
+  const rule = {};
+  rule[id] = rules[id];
+  console.log(`rule`, rule);
+  localStorage.setItem("rule", rule);
+  // window.open("./multiple-products-page/index.html");
+}
+function onEditBtnClick(id) {
+  console.log(`edit the rule for ${id}`);
+  showMakeRule(true);
+  const updateRuleBtn = document.querySelector("#add-rule");
+  updateRuleBtn.innerHTML = "Update Rule";
+  const masterInput = document.querySelector("#master-input");
+  addSelection(masterInput.parentElement, masterInput, id, true);
+  const childInput = document.querySelector("#child-input");
+  const rules = JSON.parse(localStorage.getItem("rules"));
+  addSelection(childInput.parentElement, childInput, rules[id], false);
+  changeInputs();
 }
 
 // #######################################################################
