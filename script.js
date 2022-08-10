@@ -221,11 +221,16 @@ function addSelection(parentDiv, addBefore, selectionText, isNonRemovable) {
     const span = document.createElement("span");
     span.innerHTML = selectionText;
     updateRemainingArray("delete", selectionText);
+
     btn.appendChild(span);
     btn.style.width = isNonRemovable ? "max-content" : "200px";
     btn.classList += " text-nowrap";
     btn.classList += isNonRemovable ? " non-removable" : " removable";
-    btn.addEventListener("click", isNonRemovable ? null : removeBtn);
+    if (isNonRemovable) {
+    } else {
+      btn.addEventListener("click", removeBtn);
+    }
+
     return btn;
   }
   if (addBefore.id == "master-input") {
@@ -233,14 +238,21 @@ function addSelection(parentDiv, addBefore, selectionText, isNonRemovable) {
   } else if (addBefore.id == "child-input") {
     (
       currentRuleEntries["childProducts"] ||
-      (currentRuleEntries["childProducts"] = [])
-    ).push(selectionText);
+      (currentRuleEntries["childProducts"] = new Set())
+    ).add(selectionText);
   }
   console.log(`currentRuleEntries`, currentRuleEntries);
 }
 function removeBtn(e) {
   // console.log(`removing ${e.target.childNodes[0].innerHTML}`);
   updateRemainingArray("add", e.target.childNodes[0].innerHTML);
+
+  updateCurrentSelectionChildProductSet(
+    "delete",
+    e.target.childNodes[0].innerHTML
+  );
+  console.log("currentRuleEntries", currentRuleEntries);
+
   e.target.remove();
   changeInputs();
 }
@@ -286,7 +298,7 @@ function changeInputs() {
 
 function updateRemainingArray(method, value) {
   remainingSetOfProductHandles[method](value);
-  // console.log("remainingSetOfProductHandles", remainingSetOfProductHandles);
+  console.log("remainingSetOfProductHandles", remainingSetOfProductHandles);
 }
 
 function remakeRemainingSetOfProductHandles() {
@@ -427,8 +439,20 @@ function onEditBtnClick(id) {
   addSelection(masterInput.parentElement, masterInput, id, true);
   const childInput = document.querySelector("#child-input");
   const rules = JSON.parse(localStorage.getItem("rules"));
-  addSelection(childInput.parentElement, childInput, rules[id], false);
+  rules[id].forEach((selectionText) => {
+    addSelection(childInput.parentElement, childInput, selectionText, false);
+  });
+  // rules[id].forEach((childHandle) => {
+  //   remainingSetOfProductHandles.delete(childHandle);
+  // });
+  childInput.addEventListener("click", () => {
+    autocomplete(childInput, remainingSetOfProductHandles);
+  });
   changeInputs();
+}
+
+function updateCurrentSelectionChildProductSet(method, value) {
+  currentRuleEntries.childProducts[method](value);
 }
 
 // #######################################################################
