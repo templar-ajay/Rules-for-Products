@@ -312,8 +312,9 @@ function addRule() {
     // perform crud operation in local storage
 
     const ObjectFromRules = JSON.parse(localStorage.getItem("rules"));
-    ObjectFromRules[currentRuleEntries.masterProduct] =
-      currentRuleEntries.childProducts;
+    ObjectFromRules[currentRuleEntries.masterProduct] = Array.from(
+      currentRuleEntries.childProducts
+    );
 
     localStorage.setItem("rules", JSON.stringify(ObjectFromRules));
 
