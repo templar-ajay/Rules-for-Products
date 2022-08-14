@@ -54,6 +54,7 @@ makeRuleBtn.addEventListener("click", () => {
   const childInput = document.querySelector("#child-input");
   const addRuleBtn = document.querySelector("#add-rule");
   const discardRuleBtn = document.querySelector("#discard-rule");
+
   masterInput.addEventListener("click", function (e) {
     showErrorInInput(false);
     autocomplete(masterInput, remainingSetOfProductHandles);
@@ -460,6 +461,8 @@ function onEditBtnClick(id) {
     rulesObj[id] = currentRuleEntries.childProducts;
     localStorage.setItem("rules", JSON.stringify(rulesObj));
 
+    remakeRemainingSetOfProductHandles();
+    removeMasterProductsFromRemainingSetOfProductHandles();
     resetCurrentRuleEntriesObject();
 
     showMakeRule(); //hides make rules card
@@ -468,14 +471,16 @@ function onEditBtnClick(id) {
   });
   const discardRuleBtn = document.querySelector("#discard-rule");
   discardRuleBtn.addEventListener("click", () => {
-    const nonUsedHandles = extractNonUsedHandles(
-      currentRuleEntries.childProducts,
-      JSON.parse(localStorage.getItem("rules"))[id]
-    ); // nonUsedHandles =  the handles that were taken out from the remainingSetOfProductHandles on addSelection()
-    nonUsedHandles.forEach((handle) =>
-      updateRemainingSetOfProductHandles("add", handle)
-    ); // adds them back to remainingSetOfProductHandles , as the changes are being discarded.
+    // const nonUsedHandles = extractNonUsedHandles(
+    //   currentRuleEntries.childProducts,
+    //   JSON.parse(localStorage.getItem("rules"))[id]
+    // ); // nonUsedHandles =  the handles that were taken out from the remainingSetOfProductHandles on addSelection()
+    // nonUsedHandles.forEach((handle) =>
+    //   updateRemainingSetOfProductHandles("add", handle)
+    // ); // adds them back to remainingSetOfProductHandles , as the changes are being discarded.
 
+    remakeRemainingSetOfProductHandles();
+    removeMasterProductsFromRemainingSetOfProductHandles();
     resetCurrentRuleEntriesObject();
     showMakeRule();
     showListOfRulesCard(true);
