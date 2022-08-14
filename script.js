@@ -1,6 +1,6 @@
 const productHandles = [
   "women-jacketsingle-product-1",
-  "shoes",
+  // "shoes",
   "apple-iphone-11-128gb-white-includes-earpods-power-adapter",
   "arista-variant-images-test",
   "leather-cover",
@@ -85,18 +85,27 @@ makeRuleBtn.addEventListener("click", () => {
 
 // ###################################################################
 async function getApi(givenUrl) {
-  const response = await fetch(givenUrl);
-  const data = await response.json();
-  return data;
+  try {
+    const response = await fetch(givenUrl);
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.log(`failed to load data from ${givenUrl}`);
+  }
 }
 async function foo() {
   const obj = {};
   for (let i = 0; i < productHandles.length; i++) {
     const js = await getApi(`${baseUrl + productHandles[i]}.js`);
     const json = await getApi(`${baseUrl + productHandles[i]}.json`);
-    // console.log(js, json);
+    console.log(js, json);
 
-    obj[productHandles[i]] = [js, json];
+    js && json
+      ? (obj[productHandles[i]] = [js, json])
+      : (console.log(
+          `failed to fetch add data of product${productHandles[i]}, removing it from products array`
+        ),
+        productHandles.splice(i, 1));
   }
   return obj;
 }
@@ -257,9 +266,10 @@ function removeBtn(e) {
 
   e.target.remove();
   changeInputs();
+  checkIfChildProductsEmpty();
 }
 function showMakeRule(x) {
-  const makeRuleCard = document.getElementById("make-rule-card");
+  const makeRuleCard = document.querySelector("#make-rule-card");
   x
     ? (makeRuleCard.innerHTML = makeRuleInnerHTMl)
     : (makeRuleCard.innerHTML = "");
@@ -337,14 +347,15 @@ function loadListOfRules() {
 
   for (const [key, value] of Object.entries(ObjectFromRules)) {
     const li = document.createElement("li");
-    li.className = "list-group-item d-flex justify-content-between";
+    li.className = "list-group-item d-flex justify-content-between ";
     li.style.width = "100%";
-    li.innerHTML = `<b> ${key} </b>`;
+    li.innerHTML = `<b class = "my-3"> ${key} </b>`;
 
     const span = document.createElement("span");
 
     span.appendChild(createBtn(key, "Preview", "primary"));
     span.appendChild(createBtn(key, "Edit-Rule", "warning"));
+    span.appendChild(createBtn(key, "Delete", "danger"));
 
     li.appendChild(span);
     listOfRulesEl.appendChild(li);
@@ -412,7 +423,11 @@ function showErrorInInput(x) {
 
 function createBtn(id, type, color) {
   const button = document.createElement("button");
-  button.className = `btn btn-outline-${color} mx-2`;
+  button.className = `btn btn-outline-${color} ${
+    type == "Preview" && !JSON.parse(localStorage.getItem("objectFromAPIs"))
+      ? "disabled"
+      : null
+  } mx-2 my-2`;
   button.id = `${id}-${type}-btn`;
   button.innerHTML = type[0].toUpperCase() + type.slice(1);
   button.addEventListener("click", (e) => {
@@ -420,6 +435,8 @@ function createBtn(id, type, color) {
       ? onViewBtnClick(id)
       : type == "Edit-Rule"
       ? onEditBtnClick(id)
+      : type == "Delete"
+      ? onDeleteBtnClick(id)
       : null;
   });
   return button;
@@ -432,7 +449,7 @@ function onViewBtnClick(id) {
   rule[id] = rules[id];
   console.log(`rule`, rule);
   localStorage.setItem("rule", JSON.stringify(rule));
-  // window.open("./multiple-products-page/index.html");
+  window.open("./products-page/index.html");
 }
 function onEditBtnClick(id) {
   loadCurrentRuleEntries();
@@ -510,16 +527,16 @@ function loadCurrentRuleEntries(id) {
 // deleteItemFromArray([4], arr);
 // console.log(`arr`, arr);
 
-function extractNonUsedHandles(CurrentChildArray, LocalStorageChildArray) {
-  const nonUsedHandlesArr = CurrentChildArray.filter((item) => {
-    let ret = true;
-    LocalStorageChildArray.forEach((e) => {
-      e == item ? (ret = false) : null;
-    });
-    return ret;
-  });
-  return nonUsedHandlesArr;
-}
+// function extractNonUsedHandles(CurrentChildArray, LocalStorageChildArray) {
+//   const nonUsedHandlesArr = CurrentChildArray.filter((item) => {
+//     let ret = true;
+//     LocalStorageChildArray.forEach((e) => {
+//       e == item ? (ret = false) : null;
+//     });
+//     return ret;
+//   });
+//   return nonUsedHandlesArr;
+// }
 // code to check if i made the right function
 // const arr1 = [4, 5, 6, 7];
 // const arr2 = [45, 6, 7];
@@ -530,6 +547,28 @@ function extractNonUsedHandles(CurrentChildArray, LocalStorageChildArray) {
 
 // console.log(`nonUsedNumbers`, nonUsedNumbers);
 
+function onDeleteBtnClick(id) {
+  console.log(`deleting rule`);
+
+  const rulesObj = JSON.parse(localStorage.getItem("rules"));
+  delete rulesObj[id];
+  localStorage.setItem("rules", JSON.stringify(rulesObj));
+  loadListOfRules();
+  remakeRemainingSetOfProductHandles();
+  removeMasterProductsFromRemainingSetOfProductHandles();
+}
+function checkIfChildProductsEmpty() {
+  currentRuleEntries.childProducts.length < 1
+    ? (onDeleteBtnClick(currentRuleEntries.masterProduct),
+      showMakeRule(),
+      loadListOfRules(),
+      showListOfRulesCard(true),
+      (makeRuleBtn.style.display = ""))
+    : null;
+}
+
 // #######################################################################
-// const objectFromAPIs = await foo();
-// console.log("objectFromAPIs", objectFromAPIs);
+const objectFromAPIs = await foo();
+console.log("objectFromAPIs", objectFromAPIs);
+localStorage.setItem("objectFromAPIs", JSON.stringify(objectFromAPIs));
+document.querySelector(".disabled")?.classList.remove("disabled");
