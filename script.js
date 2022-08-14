@@ -221,7 +221,7 @@ function addSelection(parentDiv, addBefore, selectionText, isNonRemovable) {
     btn.type = "button";
     const span = document.createElement("span");
     span.innerHTML = selectionText;
-    updateRemainingArray("delete", selectionText);
+    updateRemainingSetOfProductHandles("delete", selectionText);
 
     btn.appendChild(span);
     btn.style.width = isNonRemovable ? "max-content" : "200px";
@@ -239,17 +239,17 @@ function addSelection(parentDiv, addBefore, selectionText, isNonRemovable) {
   } else if (addBefore.id == "child-input") {
     (
       currentRuleEntries["childProducts"] ||
-      (currentRuleEntries["childProducts"] = new Set())
-    ).add(selectionText);
+      (currentRuleEntries["childProducts"] = [])
+    ).push(selectionText);
   }
   console.log(`currentRuleEntries`, currentRuleEntries);
 }
 function removeBtn(e) {
   // console.log(`removing ${e.target.childNodes[0].innerHTML}`);
-  updateRemainingArray("add", e.target.childNodes[0].innerHTML);
+  updateRemainingSetOfProductHandles("add", e.target.childNodes[0].innerHTML);
 
   updateCurrentSelectionChildProductSet(
-    "delete",
+    "splice",
     e.target.childNodes[0].innerHTML
   );
   console.log("currentRuleEntries", currentRuleEntries);
@@ -297,7 +297,7 @@ function changeInputs() {
   }
 }
 
-function updateRemainingArray(method, value) {
+function updateRemainingSetOfProductHandles(method, value) {
   remainingSetOfProductHandles[method](value);
   console.log("remainingSetOfProductHandles", remainingSetOfProductHandles);
 }
@@ -430,10 +430,12 @@ function onViewBtnClick(id) {
   const rule = {};
   rule[id] = rules[id];
   console.log(`rule`, rule);
-  localStorage.setItem("rule", rule);
+  localStorage.setItem("rule", JSON.stringify(rule));
   // window.open("./multiple-products-page/index.html");
 }
 function onEditBtnClick(id) {
+  loadCurrentRuleEntries();
+  showListOfRulesCard();
   console.log(`edit the rule for ${id}`);
   showMakeRule(true);
   const updateRuleBtn = document.querySelector("#add-rule");
@@ -453,14 +455,75 @@ function onEditBtnClick(id) {
   });
   changeInputs();
 
-  updateRuleBtn.addEventListener("click", () => {});
+  updateRuleBtn.addEventListener("click", () => {
+    const rulesObj = JSON.parse(localStorage.getItem("rules"));
+    rulesObj[id] = currentRuleEntries.childProducts;
+    localStorage.setItem("rules", JSON.stringify(rulesObj));
+
+    resetCurrentRuleEntriesObject();
+
+    showMakeRule(); //hides make rules card
+    showListOfRulesCard(true);
+    makeRuleBtn.style.display = "";
+  });
   const discardRuleBtn = document.querySelector("#discard-rule");
-  discardRuleBtn.addEventListener("click", () => {});
+  discardRuleBtn.addEventListener("click", () => {
+    const nonUsedHandles = extractNonUsedHandles(
+      currentRuleEntries.childProducts,
+      JSON.parse(localStorage.getItem("rules"))[id]
+    ); // nonUsedHandles =  the handles that were taken out from the remainingSetOfProductHandles on addSelection()
+    nonUsedHandles.forEach((handle) =>
+      updateRemainingSetOfProductHandles("add", handle)
+    ); // adds them back to remainingSetOfProductHandles , as the changes are being discarded.
+
+    resetCurrentRuleEntriesObject();
+    showMakeRule();
+    showListOfRulesCard(true);
+    makeRuleBtn.style.display = "";
+  });
+  makeRuleBtn.style.display = "none";
 }
 
 function updateCurrentSelectionChildProductSet(method, value) {
-  currentRuleEntries.childProducts[method](value);
+  currentRuleEntries.childProducts[method](
+    currentRuleEntries.childProducts.indexOf(value),
+    1
+  );
 }
+function loadCurrentRuleEntries(id) {
+  currentRuleEntries.masterProduct = id;
+  const rulesObj = JSON.parse(localStorage.getItem("rules"));
+  currentRuleEntries.childProducts = rulesObj[id];
+}
+
+// function deleteItemFromArray(itemsArray, array) {
+//   itemsArray.forEach((item) => {
+//     array.splice(array.indexOf(item, 1), 1);
+//   });
+// }
+// const arr = [2, 3, 4, 5];
+// deleteItemFromArray([4], arr);
+// console.log(`arr`, arr);
+
+function extractNonUsedHandles(CurrentChildArray, LocalStorageChildArray) {
+  const nonUsedHandlesArr = CurrentChildArray.filter((item) => {
+    let ret = true;
+    LocalStorageChildArray.forEach((e) => {
+      e == item ? (ret = false) : null;
+    });
+    return ret;
+  });
+  return nonUsedHandlesArr;
+}
+// code to check if i made the right function
+// const arr1 = [4, 5, 6, 7];
+// const arr2 = [45, 6, 7];
+
+// nonUsedNumbers = extractNonUsedHandles(arr1, arr2);
+// console.log(`arr1`, arr1);
+// console.log(`arr2`, arr2);
+
+// console.log(`nonUsedNumbers`, nonUsedNumbers);
 
 // #######################################################################
 // const objectFromAPIs = await foo();
