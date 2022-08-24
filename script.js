@@ -12,19 +12,50 @@ const productHandles = [
 const baseUrl = "https://afzal-test-shop.myshopify.com/products/";
 
 // ##########################################################################
-
+// declaring constants
 const container = document.getElementById("container");
 const makeRuleBtn = document.getElementById("make-rule");
 const currentRuleEntries = {};
 const remainingSetOfProductHandles = new Set();
+
+// ############################################################################
+// opening the indexedDB database
+const db = await openDB().catch((err) => {
+  console.log(
+    "error opening database, please either allow your browser to use indexedDB, or change your browser"
+  );
+});
+console.log(`db`, db);
+
+// CREATE
+// const data = {
+//   master: "apple-iphone-11-128gb-white-includes-earpods-power-adapter",
+//   childProducts: ["women-jacketsingle-product-1", "leather-cover"],
+// };
+// addData(data);
+
+// READ
+// console.log(await getData());
+
+// UPDATE
+// updateData(
+//   "apple-iphone-11-128gb-white-includes-earpods-power-adapter",
+//   "childProducts",
+//   ["hi", "hello"]
+// );
+
+// DELETE
+// deleteData("apple-iphone-11-128gb-white-includes-earpods-power-adapter");
+
+// ########################################################################
+
 remakeRemainingSetOfProductHandles();
 console.log(remainingSetOfProductHandles);
 
-checkLocalStorage()
-  ? loadListOfRules()
-    ? (showListOfRulesCard(true),
-      removeMasterProductsFromRemainingSetOfProductHandles())
-    : null
+if (!db) db = await openDB();
+(await loadListOfRules())
+  ? (showListOfRulesCard(true),
+    removeMasterProductsFromRemainingSetOfProductHandles())
   : null;
 
 const makeRuleInnerHTMl = `<form autocomplete="off"><div class="card p-3">
@@ -59,6 +90,7 @@ makeRuleBtn.addEventListener("click", () => {
     showErrorInInput(false);
     autocomplete(masterInput, remainingSetOfProductHandles);
   });
+
   childInput.addEventListener("click", function (e) {
     showErrorInInput(false);
     autocomplete(childInput, remainingSetOfProductHandles);
@@ -75,6 +107,7 @@ makeRuleBtn.addEventListener("click", () => {
         (makeRuleBtn.style.display = ""))
       : null;
   });
+
   discardRuleBtn.addEventListener("click", () => {
     showMakeRule(); // deletes make rule card
     remakeRemainingSetOfProductHandles();
@@ -318,20 +351,33 @@ function remakeRemainingSetOfProductHandles() {
   console.log(`remainingSetOfProductHandles`, remainingSetOfProductHandles);
 }
 
-function addRule() {
+async function addRule() {
   if (entriesCheck()) {
     // perform crud operation in local storage
 
-    const ObjectFromRules = JSON.parse(localStorage.getItem("rules"));
-    ObjectFromRules[currentRuleEntries.masterProduct] = Array.from(
-      currentRuleEntries.childProducts
-    );
+    const ArrayOfRules = await getData();
 
-    localStorage.setItem("rules", JSON.stringify(ObjectFromRules));
+    const rule = {
+      master: currentRuleEntries.masterProduct,
+      childProducts: currentRuleEntries.childProducts,
+    };
+    addData(rule);
+
+    // updateData(
+    //   currentRuleEntries.masterProduct,
+    //   "childProducts",
+    //   currentRuleEntries.childProducts
+    // );
+    // old code
+    // ArrayOfRules[currentRuleEntries.masterProduct] = Array.from(
+    //   currentRuleEntries.childProducts
+    // );
+
+    // localStorage.setItem("rules", JSON.stringify(ArrayOfRules));
 
     resetCurrentRuleEntriesObject();
 
-    console.log(localStorage.getItem("rules"));
+    console.log(await getData());
     loadListOfRules();
     return true;
   } else {
@@ -340,27 +386,28 @@ function addRule() {
   }
 }
 
-function loadListOfRules() {
-  const ObjectFromRules = JSON.parse(localStorage.getItem("rules"));
+async function loadListOfRules() {
+  const ArrayOfRules = await getData();
   const listOfRulesEl = document.querySelector("#list-of-rules");
   listOfRulesEl.innerHTML = "";
 
-  for (const [key, value] of Object.entries(ObjectFromRules)) {
+  ArrayOfRules.forEach((obj, index) => {
     const li = document.createElement("li");
     li.className = "list-group-item d-flex justify-content-between ";
     li.style.width = "100%";
-    li.innerHTML = `<b class = "my-3"> ${key} </b>`;
+    li.innerHTML = `<b class = "my-3"> ${obj.master} </b>`; // Note -  here we will use value now
 
     const span = document.createElement("span");
 
-    span.appendChild(createBtn(key, "Preview", "primary"));
-    span.appendChild(createBtn(key, "Edit-Rule", "warning"));
-    span.appendChild(createBtn(key, "Delete", "danger"));
+    span.appendChild(createBtn(obj.master, "Preview", "primary"));
+    span.appendChild(createBtn(obj.master, "Edit-Rule", "warning"));
+    span.appendChild(createBtn(obj.master, "Delete", "danger"));
 
     li.appendChild(span);
     listOfRulesEl.appendChild(li);
-  }
-  return Object.keys(ObjectFromRules).length; // returns false if object is empty;
+  });
+
+  return await ArrayOfRules.length; // returns false if object is empty;
 }
 
 function entriesCheck() {
@@ -380,16 +427,20 @@ function resetCurrentRuleEntriesObject() {
 }
 
 function checkLocalStorage() {
-  if (!localStorage.getItem("rules")) {
-    localStorage.setItem("rules", "{}");
+  if (!getData()) {
+    db = openDB();
   } else return true;
 }
+
 function removeMasterProductsFromRemainingSetOfProductHandles() {
   // To remove master products from Set of remaining products
-  const ObjectFromRules = JSON.parse(localStorage.getItem("rules"));
-  for (const [key, value] of Object.entries(ObjectFromRules)) {
-    remainingSetOfProductHandles.delete(key);
-  }
+  getData()
+    .then((ArrayOfRules) => {
+      ArrayOfRules.forEach((obj) => {
+        remainingSetOfProductHandles.delete(obj.master);
+      });
+    })
+    .catch((err) => console.log(`err`, err));
 }
 
 function showErrorInInput(x) {
@@ -409,6 +460,7 @@ function showErrorInInput(x) {
       ? (masterInput.classList += " bg-warning")
       : masterInput.classList.remove("bg-warning");
   }
+
   if (childInput.parentElement.childNodes.length < 4) {
     childInput.placeholder = x
       ? y
@@ -441,6 +493,7 @@ function createBtn(id, type, color) {
   });
   return button;
 }
+
 function onViewBtnClick(id) {
   console.log(`id`, id);
 
@@ -451,7 +504,8 @@ function onViewBtnClick(id) {
   localStorage.setItem("rule", JSON.stringify(rule));
   window.open("./products-page/index.html");
 }
-function onEditBtnClick(id) {
+
+async function onEditBtnClick(id) {
   loadCurrentRuleEntries();
   showListOfRulesCard();
   console.log(`edit the rule for ${id}`);
@@ -461,8 +515,11 @@ function onEditBtnClick(id) {
   const masterInput = document.querySelector("#master-input");
   addSelection(masterInput.parentElement, masterInput, id, true);
   const childInput = document.querySelector("#child-input");
-  const rules = JSON.parse(localStorage.getItem("rules"));
-  rules[id].forEach((selectionText) => {
+  const rules = await getData();
+  const theRule = rules.filter((rule) => {
+    return rule.master === id;
+  });
+  theRule[0].childProducts.forEach((selectionText) => {
     addSelection(childInput.parentElement, childInput, selectionText, false);
   });
   // rules[id].forEach((childHandle) => {
@@ -473,10 +530,12 @@ function onEditBtnClick(id) {
   });
   changeInputs();
 
-  updateRuleBtn.addEventListener("click", () => {
-    const rulesObj = JSON.parse(localStorage.getItem("rules"));
-    rulesObj[id] = currentRuleEntries.childProducts;
-    localStorage.setItem("rules", JSON.stringify(rulesObj));
+  updateRuleBtn.addEventListener("click", async () => {
+    const rulesObj = await getData();
+    const theRule = rulesObj.filter((rule) => rule.master === id)[0];
+    theRule.childProducts = currentRuleEntries.childProducts;
+
+    updateData(theRule.master, "childProducts", theRule.childProducts);
 
     remakeRemainingSetOfProductHandles();
     removeMasterProductsFromRemainingSetOfProductHandles();
@@ -512,10 +571,11 @@ function updateCurrentSelectionChildProductSet(method, value) {
     1
   );
 }
-function loadCurrentRuleEntries(id) {
+async function loadCurrentRuleEntries(id) {
   currentRuleEntries.masterProduct = id;
-  const rulesObj = JSON.parse(localStorage.getItem("rules"));
-  currentRuleEntries.childProducts = rulesObj[id];
+  const rules = await getData();
+  const theRule = rules.filter((rule) => (rule.master === id ? true : false));
+  currentRuleEntries.childProducts = theRule.childProducts;
 }
 
 // function deleteItemFromArray(itemsArray, array) {
@@ -547,12 +607,15 @@ function loadCurrentRuleEntries(id) {
 
 // console.log(`nonUsedNumbers`, nonUsedNumbers);
 
-function onDeleteBtnClick(id) {
+async function onDeleteBtnClick(id) {
   console.log(`deleting rule`);
 
-  const rulesObj = JSON.parse(localStorage.getItem("rules"));
-  delete rulesObj[id];
-  localStorage.setItem("rules", JSON.stringify(rulesObj));
+  // const rules = await getData();
+  // const theRule = rules.filter((rule) => rule.master === id)[0];
+  // // delete rulesObj[id];
+
+  deleteData(id);
+
   loadListOfRules();
   remakeRemainingSetOfProductHandles();
   removeMasterProductsFromRemainingSetOfProductHandles();
@@ -572,3 +635,107 @@ const objectFromAPIs = await foo();
 console.log("objectFromAPIs", objectFromAPIs);
 localStorage.setItem("objectFromAPIs", JSON.stringify(objectFromAPIs));
 document.querySelector(".disabled")?.classList.remove("disabled");
+
+// #######################################################################
+// converting to indexedDB
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open("database", 1);
+
+    request.onerror = (e) => {
+      reject(e.target.error);
+    };
+
+    request.onsuccess = (e) => {
+      resolve(e.target.result);
+    };
+
+    request.onupgradeneeded = (e) => {
+      const db = e.target.result || request.result;
+
+      const objectStore = db.createObjectStore("rules", { keyPath: "master" });
+
+      objectStore.transaction.oncomplete = (e) => {
+        console.log("Object store created successfully");
+      };
+    };
+  });
+}
+
+async function addData(data) {
+  if (!db) db = await openDB();
+
+  const objectStore = db
+    .transaction(["rules"], "readwrite")
+    .objectStore("rules");
+
+  const request = objectStore.add(data);
+
+  request.onsuccess = (e) => {
+    console.log(data, `added to the Object Store`);
+  };
+  request.onerror = (e) => {
+    console.log(`Error loading database ${e.target.error}`);
+  };
+}
+
+async function getData(
+  key /* used to delete the item , leave empty if you just need to get items */
+) {
+  if (!db) db = await openDB();
+  return new Promise((resolve, reject) => {
+    const objectStore = db
+      .transaction("rules", "readwrite")
+      .objectStore("rules");
+
+    const request = objectStore.openCursor();
+
+    request.onerror = (e) => {
+      console.log(reject(e.target.error));
+    };
+    const arr = [];
+    request.onsuccess = (e) => {
+      const cursor = e.target.result;
+
+      cursor
+        ? (cursor.value.master === key
+            ? (cursor.delete(),
+              console.log(`successfully deleted ${cursor.value.master}`))
+            : arr.push(cursor.value),
+          cursor.continue())
+        : (resolve(arr),
+          console.log(`cursor reached then end of rules in database `));
+    };
+  });
+}
+
+async function updateData(keyPath, key, value) {
+  if (!db) db = await openDB();
+  const objectStore = db.transaction("rules", "readwrite").objectStore("rules");
+
+  const request = objectStore.get(keyPath);
+
+  request.onerror = (e) => {
+    console.log(`Error !! while opening cursor on `);
+  };
+
+  request.onsuccess = (e) => {
+    const data = e.target.result;
+    console.log(`data`, data);
+    data[key] = value;
+
+    const updateRequest = objectStore.put(data);
+    updateRequest.onerror = (e) => {
+      console.log(`failed to put data - Error !! ${e.target.error}`);
+    };
+
+    updateRequest.onsuccess = (e) => {
+      console.log(value, ` updated successfully in childProducts`);
+    };
+  };
+}
+
+function deleteData(key) {
+  getData(key);
+}
