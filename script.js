@@ -373,7 +373,7 @@ async function addRule() {
     //   currentRuleEntries.childProducts
     // );
 
-    // localStorage.setItem("rules", JSON.stringify(ArrayOfRules));
+    // sessionStorage.setItem("rules", JSON.stringify(ArrayOfRules));
 
     resetCurrentRuleEntriesObject();
 
@@ -426,11 +426,11 @@ function resetCurrentRuleEntriesObject() {
   currentRuleEntries.childProducts = [];
 }
 
-function checkLocalStorage() {
-  if (!getData()) {
-    db = openDB();
-  } else return true;
-}
+// function checkSessionStorage() {
+//   if (!getData()) {
+//     db = openDB();
+//   } else return true;
+// }
 
 function removeMasterProductsFromRemainingSetOfProductHandles() {
   // To remove master products from Set of remaining products
@@ -476,7 +476,7 @@ function showErrorInInput(x) {
 function createBtn(id, type, color) {
   const button = document.createElement("button");
   button.className = `btn btn-outline-${color} ${
-    type == "Preview" && !JSON.parse(localStorage.getItem("objectFromAPIs"))
+    type == "Preview" && !JSON.parse(sessionStorage.getItem("objectFromAPIs"))
       ? "disabled"
       : null
   } mx-2 my-2`;
@@ -494,14 +494,16 @@ function createBtn(id, type, color) {
   return button;
 }
 
-function onViewBtnClick(id) {
+async function onViewBtnClick(id) {
   console.log(`id`, id);
 
-  const rules = JSON.parse(localStorage.getItem("rules"));
-  const rule = {};
-  rule[id] = rules[id];
-  console.log(`rule`, rule);
-  localStorage.setItem("rule", JSON.stringify(rule));
+  const rules = await getData();
+  rules.forEach((rule) => {
+    updateData(rule.master, "currentRule", false);
+  });
+  const theRule = rules.filter((rule) => rule.master === id)[0];
+  updateData(id, "currentRule", true);
+
   window.open("./products-page/index.html");
 }
 
@@ -549,7 +551,7 @@ async function onEditBtnClick(id) {
   discardRuleBtn.addEventListener("click", () => {
     // const nonUsedHandles = extractNonUsedHandles(
     //   currentRuleEntries.childProducts,
-    //   JSON.parse(localStorage.getItem("rules"))[id]
+    //   JSON.parse(sessionStorage.getItem("rules"))[id]
     // ); // nonUsedHandles =  the handles that were taken out from the remainingSetOfProductHandles on addSelection()
     // nonUsedHandles.forEach((handle) =>
     //   updateRemainingSetOfProductHandles("add", handle)
@@ -587,10 +589,10 @@ async function loadCurrentRuleEntries(id) {
 // deleteItemFromArray([4], arr);
 // console.log(`arr`, arr);
 
-// function extractNonUsedHandles(CurrentChildArray, LocalStorageChildArray) {
+// function extractNonUsedHandles(CurrentChildArray, sessionStorageChildArray) {
 //   const nonUsedHandlesArr = CurrentChildArray.filter((item) => {
 //     let ret = true;
-//     LocalStorageChildArray.forEach((e) => {
+//     sessionStorageChildArray.forEach((e) => {
 //       e == item ? (ret = false) : null;
 //     });
 //     return ret;
@@ -633,109 +635,15 @@ function checkIfChildProductsEmpty() {
 // #######################################################################
 const objectFromAPIs = await foo();
 console.log("objectFromAPIs", objectFromAPIs);
-localStorage.setItem("objectFromAPIs", JSON.stringify(objectFromAPIs));
+sessionStorage.setItem("objectFromAPIs", JSON.stringify(objectFromAPIs));
 document.querySelector(".disabled")?.classList.remove("disabled");
 
 // #######################################################################
 // converting to indexedDB
-
-function openDB() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open("database", 1);
-
-    request.onerror = (e) => {
-      reject(e.target.error);
-    };
-
-    request.onsuccess = (e) => {
-      resolve(e.target.result);
-    };
-
-    request.onupgradeneeded = (e) => {
-      const db = e.target.result || request.result;
-
-      const objectStore = db.createObjectStore("rules", { keyPath: "master" });
-
-      objectStore.transaction.oncomplete = (e) => {
-        console.log("Object store created successfully");
-      };
-    };
-  });
-}
-
-async function addData(data) {
-  if (!db) db = await openDB();
-
-  const objectStore = db
-    .transaction(["rules"], "readwrite")
-    .objectStore("rules");
-
-  const request = objectStore.add(data);
-
-  request.onsuccess = (e) => {
-    console.log(data, `added to the Object Store`);
-  };
-  request.onerror = (e) => {
-    console.log(`Error loading database ${e.target.error}`);
-  };
-}
-
-async function getData(
-  key /* used to delete the item , leave empty if you just need to get items */
-) {
-  if (!db) db = await openDB();
-  return new Promise((resolve, reject) => {
-    const objectStore = db
-      .transaction("rules", "readwrite")
-      .objectStore("rules");
-
-    const request = objectStore.openCursor();
-
-    request.onerror = (e) => {
-      console.log(reject(e.target.error));
-    };
-    const arr = [];
-    request.onsuccess = (e) => {
-      const cursor = e.target.result;
-
-      cursor
-        ? (cursor.value.master === key
-            ? (cursor.delete(),
-              console.log(`successfully deleted ${cursor.value.master}`))
-            : arr.push(cursor.value),
-          cursor.continue())
-        : (resolve(arr),
-          console.log(`cursor reached then end of rules in database `));
-    };
-  });
-}
-
-async function updateData(keyPath, key, value) {
-  if (!db) db = await openDB();
-  const objectStore = db.transaction("rules", "readwrite").objectStore("rules");
-
-  const request = objectStore.get(keyPath);
-
-  request.onerror = (e) => {
-    console.log(`Error !! while opening cursor on `);
-  };
-
-  request.onsuccess = (e) => {
-    const data = e.target.result;
-    console.log(`data`, data);
-    data[key] = value;
-
-    const updateRequest = objectStore.put(data);
-    updateRequest.onerror = (e) => {
-      console.log(`failed to put data - Error !! ${e.target.error}`);
-    };
-
-    updateRequest.onsuccess = (e) => {
-      console.log(value, ` updated successfully in childProducts`);
-    };
-  };
-}
-
-function deleteData(key) {
-  getData(key);
-}
+import {
+  openDB,
+  addData,
+  getData,
+  updateData,
+  deleteData,
+} from "./myAsyncIndexedDBMethods.js";

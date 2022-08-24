@@ -1,10 +1,16 @@
+import {
+  openDB,
+  addData,
+  getData,
+  updateData,
+  deleteData,
+} from "../myAsyncIndexedDBMethods.js";
+
 const baseUrl = "https://afzal-test-shop.myshopify.com/products/";
 
-const objectFromAPIs = JSON.parse(localStorage.getItem("objectFromAPIs"));
-console.log("objectFromAPIs", objectFromAPIs);
-
-const rule = JSON.parse(localStorage.getItem("rule"));
-const childProducts = rule[Object.keys(rule)[0]];
+const objectFromAPIs = JSON.parse(sessionStorage.getItem("objectFromAPIs"));
+const rule = (await getData()).filter((rule) => rule.currentRule === true)[0];
+const childProducts = rule.childProducts;
 
 const childProductsObj = makeObjectOfChildProducts();
 
