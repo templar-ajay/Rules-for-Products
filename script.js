@@ -1,6 +1,8 @@
+const baseUrl = "https://afzal-test-shop.myshopify.com/products/";
 const productHandles = [
   "women-jacketsingle-product-1",
-  // "shoes",
+  "shoes",
+  "fake-product",
   "apple-iphone-11-128gb-white-includes-earpods-power-adapter",
   "arista-variant-images-test",
   "leather-cover",
@@ -9,7 +11,49 @@ const productHandles = [
   "shirt_with_video",
   "shirt_with_video",
 ];
-const baseUrl = "https://afzal-test-shop.myshopify.com/products/";
+const failedProducts = [];
+const cookiesEmpty = crossCheckIfProductIsAvailable(checkForCookies()); // cookie validation
+
+function updateCookie(name, value) {
+  document.cookie = `${name}=${value};Max-Age=86400; SameSite=Strict; Secure`;
+  console.trace(`cookie updated to`, document.cookie);
+}
+
+function checkForCookies() {
+  const failedProductsInCookies = document.cookie
+    ?.split(";")
+    .find((item) => {
+      return item.includes("failedProduct");
+    })
+    ?.split("=")[1]
+    .split(",");
+
+  failedProductsInCookies?.forEach((failedProduct) => {
+    const i = productHandles.indexOf(failedProduct);
+
+    i > 0 ? productHandles.splice(i, 1) : null;
+  });
+  return failedProductsInCookies;
+}
+
+function clearCookie(name) {
+  document.cookie = name + `= ;expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
+}
+function crossCheckIfProductIsAvailable(failedProductsInCookies) {
+  if (!failedProductsInCookies?.length) return true;
+
+  failedProductsInCookies.forEach((product) => {
+    getApi(`${baseUrl + product}.json`).then((json) => {
+      json
+        ? (failedProducts.splice(failedProducts.indexOf(product), 1),
+          failedProductsInCookies.length < 2
+            ? clearCookie("failedProduct")
+            : updateCookie("failedProduct", failedProducts.join(",")),
+          productHandles.push(product))
+        : null;
+    });
+  });
+}
 
 // ##########################################################################
 // declaring constants
@@ -20,12 +64,7 @@ const remainingSetOfProductHandles = new Set();
 
 // ############################################################################
 // opening the indexedDB database
-const db = await openDB().catch((err) => {
-  console.log(
-    "error opening database, please either allow your browser to use indexedDB, or change your browser"
-  );
-});
-console.log(`db`, db);
+const db = await openDB().catch((err) => {});
 
 // CREATE
 // const data = {
@@ -50,12 +89,10 @@ console.log(`db`, db);
 // ########################################################################
 
 remakeRemainingSetOfProductHandles();
-console.log(remainingSetOfProductHandles);
 
 if (!db) db = await openDB();
 (await loadListOfRules())
-  ? (
-    showListOfRulesCard(true),
+  ? (showListOfRulesCard(true),
     removeMasterProductsFromRemainingSetOfProductHandles())
   : null;
 
@@ -101,7 +138,7 @@ makeRuleBtn.addEventListener("click", () => {
     // if (!entriesCheck()) return; // exit function if it fails entry check
 
     addRule()
-      ? (showListOfRulesCard(true,true), //  shows list of added rules
+      ? (showListOfRulesCard(true, true), //  shows list of added rules
         loadListOfRules(),
         showMakeRule(), // deletes make rule card
         remakeRemainingSetOfProductHandles(),
@@ -130,18 +167,32 @@ async function getApi(givenUrl) {
 }
 async function foo() {
   const obj = {};
+  const indexes = [];
   for (let i = 0; i < productHandles.length; i++) {
     const js = await getApi(`${baseUrl + productHandles[i]}.js`);
     const json = await getApi(`${baseUrl + productHandles[i]}.json`);
-    console.log(js, json);
 
     js && json
       ? (obj[productHandles[i]] = [js, json])
       : (console.log(
-          `failed to fetch add data of product${productHandles[i]}, removing it from products array`
+          `failed to fetch data of product ${productHandles[i]}, removing it from products array`
         ),
-        productHandles.splice(i, 1));
+        failedProducts.push(productHandles[i]),
+        updateCookie(
+          "failedProduct",
+          failedProducts.join(",")
+          // (baseUrl + productHandles[i] + ".js")
+          //   .split("/")
+          //   [givenUrl.split("/").length - 1].match(
+          //     new RegExp(/[a-z0-9\-\_]{1,}/gi)
+          //   )[0]
+        ),
+        indexes.push(i));
   }
+  indexes.forEach((i) => {
+    productHandles.splice(i, 1);
+  });
+  cookiesEmpty ? window.location.reload() : null;
   return obj;
 }
 
@@ -287,7 +338,6 @@ function addSelection(parentDiv, addBefore, selectionText, isNonRemovable) {
       (currentRuleEntries["childProducts"] = [])
     ).push(selectionText);
   }
-  console.log(`currentRuleEntries`, currentRuleEntries);
 }
 function removeBtn(e) {
   // console.log(`removing ${e.target.childNodes[0].innerHTML}`);
@@ -297,7 +347,6 @@ function removeBtn(e) {
     "splice",
     e.target.childNodes[0].innerHTML
   );
-  console.log("currentRuleEntries", currentRuleEntries);
 
   e.target.remove();
   changeInputs();
@@ -345,12 +394,10 @@ function changeInputs() {
 
 function updateRemainingSetOfProductHandles(method, value) {
   remainingSetOfProductHandles[method](value);
-  console.log("remainingSetOfProductHandles", remainingSetOfProductHandles);
 }
 
 function remakeRemainingSetOfProductHandles() {
   productHandles.forEach((value) => remainingSetOfProductHandles.add(value));
-  console.log(`remainingSetOfProductHandles`, remainingSetOfProductHandles);
 }
 
 async function addRule() {
@@ -379,7 +426,7 @@ async function addRule() {
 
     resetCurrentRuleEntriesObject();
 
-    console.log(await getData());
+    await getData();
     loadListOfRules();
     return true;
   } else {
@@ -497,8 +544,6 @@ function createBtn(id, type, color) {
 }
 
 async function onViewBtnClick(id) {
-  console.log(`id`, id);
-
   const rules = await getData();
   rules.forEach((rule) => {
     updateData(rule.master, "currentRule", false);
@@ -512,7 +557,6 @@ async function onViewBtnClick(id) {
 async function onEditBtnClick(id) {
   loadCurrentRuleEntries();
   showListOfRulesCard();
-  console.log(`edit the rule for ${id}`);
   showMakeRule(true);
   const updateRuleBtn = document.querySelector("#add-rule");
   updateRuleBtn.innerHTML = "Update Rule";
@@ -612,8 +656,6 @@ async function loadCurrentRuleEntries(id) {
 // console.log(`nonUsedNumbers`, nonUsedNumbers);
 
 async function onDeleteBtnClick(id) {
-  console.log(`deleting rule`);
-
   // const rules = await getData();
   // const theRule = rules.filter((rule) => rule.master === id)[0];
   // // delete rulesObj[id];
@@ -636,7 +678,6 @@ function checkIfChildProductsEmpty() {
 
 // #######################################################################
 const objectFromAPIs = await foo();
-console.log("objectFromAPIs", objectFromAPIs);
 sessionStorage.setItem("objectFromAPIs", JSON.stringify(objectFromAPIs));
 document.querySelector(".disabled")?.classList.remove("disabled");
 

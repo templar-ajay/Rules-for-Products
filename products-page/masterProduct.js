@@ -196,10 +196,8 @@ function displayPrice(givenPrice, givenComparePrice) {
     ? (price.innerText = "")
     : (price.innerText = String(givenPrice).slice(0, -2) + " INR");
 
-  givenComparePrice === null
-    ? (comparedPrice.innerText = "")
-    : (comparedPrice.innerText =
-        String(givenComparePrice).slice(0, -2) + " INR");
+  givenComparePrice === null ? (comparedPrice.innerText = "") : console;
+  comparedPrice.innerText = String(givenComparePrice).slice(0, -2) + " INR";
 }
 
 // load options in dom from js
