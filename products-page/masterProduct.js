@@ -187,18 +187,19 @@ function loadPrices(variantID) {
     }
   });
   if (NO_VARIANT_FOUND) {
-    displayPrice("null", "null");
+    displayPrice();
   }
 }
 
 function displayPrice(givenPrice, givenComparePrice) {
-  if (givenPrice && givenComparePrice == "null") {
-    price.innerText = "";
-    comparedPrice.innerText = "";
-  } else {
-    price.innerText = String(givenPrice).slice(0, -2) + " INR";
-    comparedPrice.innerText = String(givenComparePrice).slice(0, -2) + " INR";
-  }
+  givenPrice === null
+    ? (price.innerText = "")
+    : (price.innerText = String(givenPrice).slice(0, -2) + " INR");
+
+  givenComparePrice === null
+    ? (comparedPrice.innerText = "")
+    : (comparedPrice.innerText =
+        String(givenComparePrice).slice(0, -2) + " INR");
 }
 
 // load options in dom from js
