@@ -54,7 +54,8 @@ console.log(remainingSetOfProductHandles);
 
 if (!db) db = await openDB();
 (await loadListOfRules())
-  ? (showListOfRulesCard(true),
+  ? (
+    showListOfRulesCard(true),
     removeMasterProductsFromRemainingSetOfProductHandles())
   : null;
 
@@ -100,7 +101,8 @@ makeRuleBtn.addEventListener("click", () => {
     // if (!entriesCheck()) return; // exit function if it fails entry check
 
     addRule()
-      ? (showListOfRulesCard(true), //  shows list of added rules
+      ? (showListOfRulesCard(true,true), //  shows list of added rules
+        loadListOfRules(),
         showMakeRule(), // deletes make rule card
         remakeRemainingSetOfProductHandles(),
         removeMasterProductsFromRemainingSetOfProductHandles(),
@@ -308,10 +310,10 @@ function showMakeRule(x) {
     : (makeRuleCard.innerHTML = "");
 }
 
-function showListOfRulesCard(x) {
+function showListOfRulesCard(x, force) {
   const listOfRulesCard = document.querySelector("#list-of-rules-card");
   const listOfRulesEl = document.querySelector("#list-of-rules");
-  listOfRulesEl.innerHTML == ""
+  listOfRulesEl.innerHTML == "" && !force
     ? null
     : x
     ? (listOfRulesCard.style.display = "block")
