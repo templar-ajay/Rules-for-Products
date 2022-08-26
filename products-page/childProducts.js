@@ -5,6 +5,9 @@ import {
   updateData,
   deleteData,
 } from "../myAsyncIndexedDBMethods.js";
+import { checkCookieForBadProduct } from "./cookieMethods.js";
+
+// checkCookieForBadProduct.then((badProducts) => {});
 
 const baseUrl = "https://afzal-test-shop.myshopify.com/products/";
 
