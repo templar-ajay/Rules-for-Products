@@ -180,7 +180,14 @@ async function foo() {
   failedProducts.forEach((failedProduct) => {
     productHandles.splice(productHandles.indexOf(failedProduct), 1);
   });
-  cookiesEmpty ? window.location.reload() : null;
+
+  cookiesEmpty
+    ? window.confirm(
+        "some error occurred while fetching products , we are refreshing the Page"
+      )
+      ? window.location.reload()
+      : window.location.reload()
+    : null;
   return obj;
 }
 
