@@ -12,47 +12,45 @@ const productHandles = [
   "shirt_with_video",
 ];
 const failedProducts = [];
-const cookiesEmpty = crossCheckIfProductIsAvailable(checkForCookies()); // cookie validation
-
-function updateCookie(name, value) {
-  document.cookie = `${name}=${value};Max-Age=86400; SameSite=Strict; Secure`;
-  console.trace(`cookie updated to`, document.cookie);
-}
+checkForCookies(); // cookie validation
+const cookiesEmpty = crossCheckIfProductIsAvailable();
 
 function checkForCookies() {
-  const failedProductsInCookies = document.cookie
+  document.cookie
     ?.split(";")
     .find((item) => {
       return item.includes("failedProduct");
     })
     ?.split("=")[1]
-    .split(",");
+    .split(",")
+    .forEach((failedProduct) => {
+      failedProducts.push(failedProduct);
+    });
 
-  failedProductsInCookies?.forEach((failedProduct) => {
-    const i = productHandles.indexOf(failedProduct);
-
-    i > 0 ? productHandles.splice(i, 1) : null;
+  failedProducts?.forEach((failedProduct, index) => {
+    productHandles.splice(productHandles.indexOf(failedProduct), 1);
   });
-  return failedProductsInCookies;
 }
 
-function clearCookie(name) {
-  document.cookie = name + `= ;expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
-}
-function crossCheckIfProductIsAvailable(failedProductsInCookies) {
-  if (!failedProductsInCookies?.length) return true;
+function crossCheckIfProductIsAvailable() {
+  if (!failedProducts?.length) return true;
 
-  failedProductsInCookies.forEach((product) => {
-    getApi(`${baseUrl + product}.json`).then((json) => {
+  const succeeded = [];
+  failedProducts.forEach((failedProduct) => {
+    getApi(`${baseUrl + failedProduct}.json`).then((json) => {
       json
-        ? (failedProducts.splice(failedProducts.indexOf(product), 1),
-          failedProductsInCookies.length < 2
-            ? clearCookie("failedProduct")
-            : updateCookie("failedProduct", failedProducts.join(",")),
-          productHandles.push(product))
+        ? (succeeded.push(failedProduct), productHandles.push(failedProduct))
         : null;
     });
   });
+  succeeded.forEach((product) => {
+    failedProducts.splice(failedProducts.indexOf(product), 1);
+  });
+  failedProducts.length
+    ? updateCookie("failedProduct", failedProducts.join(","))
+    : clearCookie("failedProduct");
+
+  return false;
 }
 
 // ##########################################################################
@@ -167,7 +165,6 @@ async function getApi(givenUrl) {
 }
 async function foo() {
   const obj = {};
-  const indexes = [];
   for (let i = 0; i < productHandles.length; i++) {
     const js = await getApi(`${baseUrl + productHandles[i]}.js`);
     const json = await getApi(`${baseUrl + productHandles[i]}.json`);
@@ -177,20 +174,11 @@ async function foo() {
       : (console.log(
           `failed to fetch data of product ${productHandles[i]}, removing it from products array`
         ),
-        failedProducts.push(productHandles[i]),
-        updateCookie(
-          "failedProduct",
-          failedProducts.join(",")
-          // (baseUrl + productHandles[i] + ".js")
-          //   .split("/")
-          //   [givenUrl.split("/").length - 1].match(
-          //     new RegExp(/[a-z0-9\-\_]{1,}/gi)
-          //   )[0]
-        ),
-        indexes.push(i));
+        failedProducts.push(productHandles[i]));
   }
-  indexes.forEach((i) => {
-    productHandles.splice(i, 1);
+  updateCookie("failedProduct", failedProducts.join(","));
+  failedProducts.forEach((failedProduct) => {
+    productHandles.splice(productHandles.indexOf(failedProduct), 1);
   });
   cookiesEmpty ? window.location.reload() : null;
   return obj;
@@ -690,3 +678,18 @@ import {
   updateData,
   deleteData,
 } from "./myAsyncIndexedDBMethods.js";
+
+function clearCookie(name) {
+  document.cookie = name + `= ;expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
+}
+function updateCookie(name, value) {
+  document.cookie = `${name}=${value};Max-Age=86400; SameSite=Strict; Secure`;
+  console.trace(`cookie updated to`, document.cookie);
+}
+
+// to get handle from url
+// (baseUrl + productHandles[i] + ".js")
+//   .split("/")
+//   [givenUrl.split("/").length - 1].match(
+//     new RegExp(/[a-z0-9\-\_]{1,}/gi)
+//   )[0]
