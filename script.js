@@ -230,7 +230,9 @@
       // #######################################################################
       MAIN_OBJ.objectFromAPIs = await MAIN_OBJ.foo();
       sessionStorage.setItem("objectFromAPIs", JSON.stringify(MAIN_OBJ.objectFromAPIs));
-      document.querySelector(".disabled")?.classList.remove("disabled");
+      document.querySelectorAll(".disabled")?.forEach((button) => {
+        button.classList.remove("disabled");
+      });
 
       // #######################################################################
     },
