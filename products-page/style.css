@@ -3,7 +3,7 @@
   padding: 0;
   box-sizing: border-box;
 }
-/*  creates a variable to use in whole css file , really usefull in making themes */
+/*  creates a variable to use in whole css file , really useful in making themes */
 :root {
   --background-color: #ff523b;
   --color: #fff;
@@ -19,7 +19,7 @@ body {
   display: flex;
   align-items: center;
   padding: 20px;
-}
+} 
 nav {
   flex: 1;
   text-align: right;
@@ -27,45 +27,45 @@ nav {
 nav ul {
   display: inline-block;
   list-style-type: none;
-}
-nav ul li {
+} 
+ nav ul li {
   display: inline-block;
   margin-right: 20px;
-}
+} 
 a {
   text-decoration: none;
   color: #555;
 }
 p {
   color: #555;
-}
+} 
 .container {
   max-width: 1300px;
   margin: auto;
   padding-left: 25px;
   padding-right: 25px;
 }
-.row {
+.x-row {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   justify-content: space-around;
 }
-.col-2 {
+.x-col-2 {
   flex-basis: 50%;
   min-width: 300px;
 }
-.col-2 img {
+.x-col-2 img {
   max-width: 100%;
   padding: 50px 0;
 }
-.col-2 h1 {
+.x-col-2 h1 {
   font-size: 50px;
   line-height: 60px;
   margin: 25px 0;
 }
 
-.btn {
+.x-btn {
   display: inline-block;
   background: var(--background-color);
   color: var(--color);
@@ -75,12 +75,12 @@ p {
   transition-duration: 0.5s;
   cursor: pointer;
 }
-.btn:hover {
+.x-btn:hover {
   background: var(--background-on-hover);
-}
-.btn-color-swatch {
+} 
+.x-btn-color-swatch {
   display: inline-block;
-  background: var(--background-color);
+  background-color: var(--background);
   color: var(--color);
   padding: 8px 30px;
   margin: 30px 0;
@@ -89,11 +89,11 @@ p {
   cursor: pointer;
   box-shadow: var(--shadow);
 }
-.btn-color-swatch:hover {
+.x-btn-color-swatch:hover {
   background: var(--background-on-hover);
 }
 
-.picker-img {
+.x-picker-img {
   margin: 10px;
   padding: 10px;
   min-height: 100px;
@@ -103,7 +103,7 @@ p {
 .header {
   background: radial-gradient(white, #ffd6d6);
 }
-/* .header .row{
+.header .x-row{
       margin-top: 70px;
   } */
 .categories {
@@ -119,14 +119,14 @@ p {
 .col-3 img {
   width: 100%;
 }
-.small-container {
+.x-small-container {
   min-width: 250px;
   max-width: 1080px;
   margin: auto;
   padding-left: 25px;
   padding-right: 25px;
 }
-.col-4 {
+.x-col-4 {
   flex-basis: 25%;
   padding: 10px;
   min-width: 200px;
@@ -134,7 +134,7 @@ p {
   transition: transform 0.5s;
   font-size: 14px;
 }
-.col-4 img {
+.x-col-4 img {
   width: 100%;
 }
 .title {
@@ -158,11 +158,11 @@ p {
 h4 {
   color: #555;
   font-weight: normal;
-}
+} 
 .rating .fa {
   color: var(--background-color);
 }
-.col-4:hover {
+.x-col-4:hover {
   transform: translateY(-5px);
 }
 
@@ -173,7 +173,7 @@ h4 {
   margin-top: 80px;
   padding: 30px 0px;
 }
-.col-2 .offer-img {
+.x-col-2 .offer-img {
   padding: 50px;
 }
 small {
@@ -249,13 +249,7 @@ small {
   color: #fff;
   margin-bottom: 20px;
 }
-.footer-col-1st,
-.footer-col-2nd,
-.footer-col-3rd,
-.footer-col-4th {
-  min-width: 250px;
-  margin-bottom: 20px;
-}
+
 .footer-col-1st {
   flex-basis: 30%;
   text-align: center;
@@ -268,11 +262,7 @@ small {
   width: 180px;
   margin-bottom: 20px;
 }
-.footer-col-3rd,
-.footer-col-4th {
-  flex-basis: 12%;
-  text-align: center;
-}
+
 ul {
   list-style-type: none;
 }
@@ -332,25 +322,25 @@ select:focus {
 
 /* ---------------single product details-------------- */
 
-.single-product {
+.x-single-product {
   margin-top: 80px;
 }
-.single-product .col-2 img {
+.x-single-product .x-col-2 img {
   padding: 0;
 }
-.single-product .col-2 {
+.x-single-product .x-col-2 {
   padding: 20px;
 }
-.single-product h4 {
+.x-single-product h4 {
   margin: 20x 0;
   font-size: 22px;
 }
-.single-product select {
+.x-single-product select {
   display: block;
   padding: 10px;
   margin-top: 20px;
 }
-.single-product input {
+.x-single-product input {
   width: 50px;
   height: 40px;
   padding-left: 10px;
@@ -362,29 +352,29 @@ select:focus {
 input:focus {
   outline: none;
 }
-.single-product .fa {
+.x-single-product .fa {
   color: var(--background-color);
   margin-left: 10px;
 }
-.small-img-row {
+.x-small-img-row {
   display: inline-flex;
   justify-content: space-between;
 }
-.scroll {
+.x-scroll {
   overflow-y: hidden;
   overflow-x: scroll;
 }
-.small-img-col {
+.x-small-img-col {
   flex-basis: 24%;
   cursor: pointer;
   width: 120px;
 }
 
-.video {
+.x-video {
   position: relative;
 }
 
-.video a {
+.x-video a {
   position: absolute;
   display: block;
   background: url(http://www.slatecube.com/images/play-btn.png);
@@ -401,7 +391,7 @@ input:focus {
 .cart-page {
   margin: 80px auto;
 }
-.cart-page .btn {
+.cart-page .x-btn {
   border: none;
   float: right;
   min-width: 180px;
@@ -495,13 +485,13 @@ form input {
   padding: 0 10px;
   border: 1px solid #ccc;
 }
-form .btn {
+form .x-btn {
   width: 100%;
   border: none;
   cursor: pointer;
   margin: 10px 0;
 }
-form .btn:focus {
+form .x-btn:focus {
   outline: none;
 }
 #loginForm {
@@ -559,7 +549,7 @@ form a {
   padding-top: 100px;
   background-color: white;
 }
-.my-projects .col-2 {
+.my-projects .x-col-2 {
   min-width: 250px;
   flex-basis: 30%;
   margin-bottom: 30px;
@@ -569,19 +559,19 @@ form a {
   cursor: pointer;
   transition: transform 0.5s;
 }
-.my-projects .col-2:hover {
+.my-projects .x-col-2:hover {
   transform: translateY(-6px);
 }
-.my-projects .col-2 img {
+.my-projects .x-col-2 img {
   width: 100%;
   padding: 20px 0px 0px;
 }
-.mew .btn {
+.mew .x-btn {
   font-size: 60px;
   background: white;
   color: black;
 }
-.mew .btn:hover {
+.mew .x-btn:hover {
   background: white;
   color: var(--background-color);
   text-decoration: underline;
@@ -626,21 +616,21 @@ a {
 /* -media query for less than 600 screen size */
 
 @media only screen and (max-width: 600px) {
-  .row {
+  .x-row {
     text-align: center;
   }
-  .col-2,
+  .x-col-2,
   .col-3,
-  col-4 {
+  .x-col-4 {
     flex-basis: 100%;
   }
-  .single-product .row {
+  .x-single-product .x-row {
     text-align: left;
   }
-  .single-product .col-2 {
+  .x-single-product .x-col-2 {
     padding: 20px 0;
   }
-  .single-product h1 {
+  .x-single-product h1 {
     font-size: 1.7em;
     line-height: 1.3em;
   }
