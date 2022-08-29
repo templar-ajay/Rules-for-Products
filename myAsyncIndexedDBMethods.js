@@ -16,7 +16,7 @@ function openDB() {
       const objectStore = db.createObjectStore("rules", { keyPath: "master" });
 
       objectStore.transaction.oncomplete = (e) => {
-        console.log("Object store created successfully");
+        // console.log("Object store created successfully");
       };
     };
   });
@@ -32,7 +32,7 @@ async function addData(data) {
   const request = objectStore.add(data);
 
   request.onsuccess = (e) => {
-    console.log(data, `added to the Object Store`);
+    // console.log(data, `added to the Object Store`);
   };
   request.onerror = (e) => {
     console.log(`Error loading database ${e.target.error}`);
@@ -59,12 +59,14 @@ async function getData(
 
       cursor
         ? (cursor.value.master === key
-            ? (cursor.delete(),
-              console.log(`successfully deleted ${cursor.value.master}`))
-            : arr.push(cursor.value),
+          ? (cursor.delete()
+            // ,console.log(`successfully deleted ${cursor.value.master}`)
+          )
+          : arr.push(cursor.value),
           cursor.continue())
-        : (resolve(arr),
-          console.log(`cursor reached then end of rules in database `));
+        : (resolve(arr)
+          // ,console.log(`cursor reached then end of rules in database `)
+        );
     };
   });
 }
@@ -81,7 +83,7 @@ async function updateData(keyPath, key, value) {
 
   request.onsuccess = (e) => {
     const data = e.target.result;
-    console.log(`data`, data);
+    // console.log(`data`, data);
     data[key] = value;
 
     const updateRequest = objectStore.put(data);
@@ -90,7 +92,7 @@ async function updateData(keyPath, key, value) {
     };
 
     updateRequest.onsuccess = (e) => {
-      console.log(value, ` updated successfully in childProducts`);
+      // console.log(value, ` updated successfully in childProducts`);
     };
   };
 }
