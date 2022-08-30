@@ -26,6 +26,8 @@
         .forEach((failedProduct) => {
           MAIN_OBJ.failedProducts.push(failedProduct);
         });
+      console.log(`MAIN_OBJ.failedProducts`, MAIN_OBJ.failedProducts);
+
 
       MAIN_OBJ.failedProducts?.forEach((failedProduct, index) => {
         MAIN_OBJ.productHandles.splice(MAIN_OBJ.productHandles.indexOf(failedProduct), 1);
@@ -217,8 +219,10 @@
                 MAIN_OBJ.showMakeRule(), // deletes make rule card
                 MAIN_OBJ.remakeRemainingSetOfProductHandles(),
                 MAIN_OBJ.removeMasterProductsFromRemainingSetOfProductHandles(),
-                (MAIN_OBJ.makeRuleBtn.style.display = "")) : ""
+                (MAIN_OBJ.makeRuleBtn.style.display = ""),
+                location.reload()) : ""
           })
+
         });
 
         discardRuleBtn.addEventListener("click", () => {
@@ -226,6 +230,7 @@
           MAIN_OBJ.remakeRemainingSetOfProductHandles();
           MAIN_OBJ.removeMasterProductsFromRemainingSetOfProductHandles();
           MAIN_OBJ.makeRuleBtn.style.display = "";
+          location.reload();
         });
       });
       // #######################################################################
@@ -281,7 +286,7 @@
         const data = await response.json();
         return data;
       } catch (err) {
-        console.log(`failed to load data from ${givenUrl}`);
+        console.trace(`failed to load data from ${givenUrl}`);
       }
     },
     foo: async function () {
@@ -302,13 +307,15 @@
         MAIN_OBJ.productHandles.splice(MAIN_OBJ.productHandles.indexOf(failedProduct), 1);
       });
 
-      MAIN_OBJ.cookiesEmpty
-        ? window.confirm(
-          "some error occurred while fetching products , we are refreshing the Page"
-        )
-          ? window.location.reload()
-          : window.location.reload()
-        : null;
+
+
+      // MAIN_OBJ.cookiesEmpty
+      //   ? window.confirm(
+      //     "some error occurred while fetching products , we are refreshing the Page"
+      //   )
+      //     ? window.location.reload()
+      //     : window.location.reload()
+      //   : null;
       return obj;
     },
     autocomplete: function (inp, set) {
@@ -722,12 +729,13 @@
       // const rules = await DB_METHODS.getData();
       // const theRule = rules.filter((rule) => rule.master === id)[0];
       // // delete rulesObj[id];
-
       DB_METHODS.deleteData(id);
 
-      MAIN_OBJ.loadListOfRules();
       MAIN_OBJ.remakeRemainingSetOfProductHandles();
       MAIN_OBJ.removeMasterProductsFromRemainingSetOfProductHandles();
+      MAIN_OBJ.loadListOfRules();
+      location.reload()
+
     },
     checkIfChildProductsEmpty: function () {
       MAIN_OBJ.currentRuleEntries.childProducts.length < 1
@@ -738,8 +746,6 @@
           (MAIN_OBJ.makeRuleBtn.style.display = ""))
         : null;
     },
-
-
   };
   const MASTER_PRODUCT_OBJ = {
     INIT: async function () {
