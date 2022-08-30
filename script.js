@@ -210,14 +210,15 @@
         addRuleBtn.addEventListener("click", () => {
           // if (!entriesCheck()) return; // exit function if it fails entry check
 
-          MAIN_OBJ.addRule()
-            ? (MAIN_OBJ.showListOfRulesCard(true, true), //  shows list of added rules
-              MAIN_OBJ.loadListOfRules(),
-              MAIN_OBJ.showMakeRule(), // deletes make rule card
-              MAIN_OBJ.remakeRemainingSetOfProductHandles(),
-              MAIN_OBJ.removeMasterProductsFromRemainingSetOfProductHandles(),
-              (MAIN_OBJ.makeRuleBtn.style.display = ""))
-            : null;
+          MAIN_OBJ.addRule().then(condition => {
+            condition ?
+              (MAIN_OBJ.showListOfRulesCard(true, true), //  shows list of added rules
+                MAIN_OBJ.loadListOfRules(),
+                MAIN_OBJ.showMakeRule(), // deletes make rule card
+                MAIN_OBJ.remakeRemainingSetOfProductHandles(),
+                MAIN_OBJ.removeMasterProductsFromRemainingSetOfProductHandles(),
+                (MAIN_OBJ.makeRuleBtn.style.display = "")) : ""
+          })
         });
 
         discardRuleBtn.addEventListener("click", () => {
@@ -592,7 +593,7 @@
       const masterInput = document.querySelector("#master-input");
       const childInput = document.querySelector("#child-input");
 
-      const y = MAIN_OBJ.remainingSetOfProductHandles.size > 2;
+      const y = MAIN_OBJ.remainingSetOfProductHandles.size > 0;
 
       if (masterInput.parentElement.childNodes.length < 4) {
         masterInput.placeholder = x
