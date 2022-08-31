@@ -1,69 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Products Page</title>
 
-    <link rel="icon" type="image" href="../favicon.png" />
-    <link rel="stylesheet" href="style.css" />
-    <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
-    />
-    <style>
-      @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap");
-    </style>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx"
-      crossorigin="anonymous"
-    />
-  </head>
-  <body>
-    <!---------------------single product details------------------------>
-    <div id="productsPage"></div>
-    <div class="x-small-container x-single-product">
-      <div class="x-row">
-        <div class="x-col-2" id="main-col">
-          <img src="" width="100%" id="big-img" />
-          <div id="big-video"></div>
-          <div class="x-scroll">
-            <div class="x-small-img-row"></div>
-          </div>
-        </div>
-        <div class="x-col-2">
-          <h1 id="title"></h1>
-          <h4 id="price"></h4>
-          <small
-            id="compared-price"
-            style="text-decoration: line-through"
-          ></small>
-          <br /><br />
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Products Page</title>
 
-          <div id="variants"></div>
-          <!-- amount of number of products input should not be less than 1 and more than 4' -->
-          <input
-            type="number"
-            value="1"
-            id="amount-input"
-            pattern="[1-4]{1}"
-            min="1"
-          />
-          <a class="x-btn">Add to Cart</a>
+  <link rel="icon" type="image" href="../favicon.png" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap");
+  </style>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous" />
+</head>
 
-          <h3>Product Description <i class="fa fa-indent"></i></h3>
-          <br />
-          <p id="description"></p>
+<body>
+  <!---------------------single product details------------------------>
+  <div id="productsPage"></div>
+  <div class="x-small-container x-single-product">
+    <div class="x-row">
+      <div class="x-col-2" id="main-col">
+        <img src="" width="100%" id="big-img" />
+        <div id="big-video"></div>
+        <div class="x-scroll">
+          <div class="x-small-img-row"></div>
         </div>
       </div>
+      <div class="x-col-2">
+        <h1 id="title"></h1>
+        <h4 id="price"></h4>
+        <small id="compared-price" style="text-decoration: line-through"></small>
+        <br /><br />
+
+        <div id="variants"></div>
+        <!-- amount of number of products input should not be less than 1 and more than 4' -->
+        <input type="number" value="1" id="amount-input" pattern="[1-4]{1}" min="1" />
+        <a class="x-btn">Add to Cart</a>
+
+        <h3>Product Description <i class="fa fa-indent"></i></h3>
+        <br />
+        <p id="description"></p>
+      </div>
     </div>
-    <!-- ----------------------------------------------------------------------------- -->
-    <div class="container-fluid p-5"> 
-      <div id="all-products" class="x-row"></div>
-    </div>
-  </body>
-  <script src="../script.js"></script>
+  </div>
+  <!-- ----------------------------------------------------------------------------- -->
+  <div class="container-fluid p-5">
+    <div id="all-products" class="x-row"></div>
+  </div>
+</body>
+<script src="../script.js"></script>
+
 </html>
