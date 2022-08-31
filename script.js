@@ -201,6 +201,7 @@
 
         masterInput.addEventListener("click", function (e) {
           MAIN_OBJ.showErrorInInput(false);
+          console.log(MAIN_OBJ.remainingSetOfProductHandles)
           MAIN_OBJ.autocomplete(masterInput, MAIN_OBJ.remainingSetOfProductHandles);
         });
 
@@ -219,8 +220,9 @@
                 MAIN_OBJ.showMakeRule(), // deletes make rule card
                 MAIN_OBJ.remakeRemainingSetOfProductHandles(),
                 MAIN_OBJ.removeMasterProductsFromRemainingSetOfProductHandles(),
-                (MAIN_OBJ.makeRuleBtn.style.display = ""),
-                location.reload()) : ""
+                (MAIN_OBJ.makeRuleBtn.style.display = "")
+                // ,location.reload()
+              ) : ""
           })
 
         });
@@ -230,7 +232,7 @@
           MAIN_OBJ.remakeRemainingSetOfProductHandles();
           MAIN_OBJ.removeMasterProductsFromRemainingSetOfProductHandles();
           MAIN_OBJ.makeRuleBtn.style.display = "";
-          location.reload();
+          // location.reload();
         });
       });
       // #######################################################################
@@ -304,10 +306,10 @@
       }
       COOKIES.updateCookie("failedProduct", MAIN_OBJ.failedProducts.join(","));
       MAIN_OBJ.failedProducts.forEach((failedProduct) => {
-        MAIN_OBJ.productHandles.splice(MAIN_OBJ.productHandles.indexOf(failedProduct), 1);
+        if (MAIN_OBJ.productHandles.indexOf(failedProduct) >= 0) {
+          MAIN_OBJ.productHandles.splice(MAIN_OBJ.productHandles.indexOf(failedProduct), 1);
+        }
       });
-
-
 
       // MAIN_OBJ.cookiesEmpty
       //   ? window.confirm(
@@ -734,7 +736,7 @@
       MAIN_OBJ.remakeRemainingSetOfProductHandles();
       MAIN_OBJ.removeMasterProductsFromRemainingSetOfProductHandles();
       MAIN_OBJ.loadListOfRules();
-      location.reload()
+      // location.reload()
 
     },
     checkIfChildProductsEmpty: function () {
